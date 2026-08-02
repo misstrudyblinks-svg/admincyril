@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Settings | BizManager</title>
+
+    <link rel="stylesheet"
+          href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="sidebar-logo">
+
+                <i class="fa-solid fa-chart-line"></i>
+
+            </div>
+
+            <div>
+
+                <h2>BizManager</h2>
+
+                <span>Business System</span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <p class="menu-title">
+                MAIN MENU
+            </p>
+
+
+            <a href="dashboard.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a href="customers.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-users"></i>
+
+                <span>Customers</span>
+
+            </a>
+
+
+            <a href="products.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-box"></i>
+
+                <span>Products</span>
+
+            </a>
+
+
+            <a href="sales.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span>Sales</span>
+
+            </a>
+
+
+            <a href="expenses.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-money-bill-transfer"></i>
+
+                <span>Expenses</span>
+
+            </a>
+
+
+            <p class="menu-title">
+                MANAGEMENT
+            </p>
+
+
+            <a href="reports.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                <span>Reports</span>
+
+            </a>
+
+
+            <a href="invoices.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-file-invoice"></i>
+
+                <span>Invoices</span>
+
+            </a>
+
+
+            <a href="settings.html"
+               class="nav-link active">
+
+                <i class="fa-solid fa-gear"></i>
+
+                <span>Settings</span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutBtn"
+                    class="logout-btn">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- MAIN -->
+
+    <main class="dashboard-main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                class="menu-toggle"
+                id="menuToggle">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Settings</h1>
+
+                <p>
+                    Configure your business system
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <button class="notification-btn">
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <span class="notification-dot"></span>
+
+                </button>
+
+
+               <div class="admin-user">
+
+    <img
+        src="images/KJPD4261.PNG"
+        alt="Admin Profile"
+        class="admin-profile-picture">
+
+    <div class="admin-user-info">
+
+        <strong>Administrator</strong>
+
+        <span>Admin</span>
+
+    </div>
+
+</div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- CONTENT -->
+
+        <section class="dashboard-content">
+
+
+            <div class="customer-page-header">
+
+                <div>
+
+                    <h2>
+                        Business Settings
+                    </h2>
+
+                    <p>
+                        Manage your business information and preferences.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BUSINESS PROFILE -->
+
+            <div class="settings-card">
+
+                <div class="settings-card-header">
+
+                    <div class="settings-icon purple">
+
+                        <i class="fa-solid fa-building"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Business Profile
+                        </h3>
+
+                        <p>
+                            Information displayed on invoices and receipts.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <form id="businessForm">
+
+
+                    <div class="settings-logo-section">
+
+                        <div
+                            class="business-logo-preview"
+                            id="logoPreview">
+
+                            <i class="fa-solid fa-building"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <h4>
+                                Business Logo
+                            </h4>
+
+                            <p>
+                                Upload your business logo.
+                            </p>
+
+
+                            <label
+                                for="businessLogo"
+                                class="secondary-btn">
+
+                                <i class="fa-solid fa-upload"></i>
+
+                                Upload Logo
+
+                            </label>
+
+
+                            <input
+                                type="file"
+                                id="businessLogo"
+                                accept="image/*"
+                                hidden>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="settings-grid">
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Business Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="businessName"
+                                placeholder="Enter business name"
+                                required>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Phone Number
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="businessPhone"
+                                placeholder="+233 XX XXX XXXX">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="businessEmail"
+                                placeholder="business@example.com">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Website
+                            </label>
+
+                            <input
+                                type="url"
+                                id="businessWebsite"
+                                placeholder="https://example.com">
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label>
+                                Business Address
+                            </label>
+
+                            <input
+                                type="text"
+                                id="businessAddress"
+                                placeholder="Enter business address">
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label>
+                                Business Description
+                            </label>
+
+                            <textarea
+                                id="businessDescription"
+                                rows="4"
+                                placeholder="Tell customers about your business"></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="settings-actions">
+
+                        <button
+                            type="button"
+                            class="cancel-btn"
+                            id="resetBusiness">
+
+                            Reset
+
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary-btn">
+
+                            <i class="fa-solid fa-floppy-disk"></i>
+
+                            Save Business Profile
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+
+            <!-- SYSTEM SETTINGS -->
+
+            <div class="settings-card">
+
+                <div class="settings-card-header">
+
+                    <div class="settings-icon blue">
+
+                        <i class="fa-solid fa-sliders"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            System Preferences
+                        </h3>
+
+                        <p>
+                            Configure how BizManager operates.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <form id="systemForm">
+
+
+                    <div class="settings-grid">
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Currency
+                            </label>
+
+                            <select id="currency">
+
+                                <option value="GH₵">
+                                    Ghana Cedi (GH₵)
+                                </option>
+
+                                <option value="$">
+                                    US Dollar ($)
+                                </option>
+
+                                <option value="£">
+                                    British Pound (£)
+                                </option>
+
+                                <option value="€">
+                                    Euro (€)
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Invoice Prefix
+                            </label>
+
+                            <input
+                                type="text"
+                                id="invoicePrefix"
+                                placeholder="INV">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Low Stock Alert
+                            </label>
+
+                            <select id="lowStock">
+
+                                <option value="5">
+                                    5 Items
+                                </option>
+
+                                <option value="10">
+                                    10 Items
+                                </option>
+
+                                <option value="20">
+                                    20 Items
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Date Format
+                            </label>
+
+                            <select id="dateFormat">
+
+                                <option value="DD/MM/YYYY">
+                                    DD/MM/YYYY
+                                </option>
+
+                                <option value="MM/DD/YYYY">
+                                    MM/DD/YYYY
+                                </option>
+
+                                <option value="YYYY-MM-DD">
+                                    YYYY-MM-DD
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="settings-toggle-list">
+
+
+                        <div class="settings-toggle">
+
+                            <div>
+
+                                <strong>
+                                    Email Notifications
+                                </strong>
+
+                                <p>
+                                    Receive business notifications.
+                                </p>
+
+                            </div>
+
+
+                            <label class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="emailNotifications">
+
+                                <span class="slider"></span>
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="settings-toggle">
+
+                            <div>
+
+                                <strong>
+                                    Low Stock Notifications
+                                </strong>
+
+                                <p>
+                                    Alert when products are running low.
+                                </p>
+
+                            </div>
+
+
+                            <label class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="stockNotifications"
+                                    checked>
+
+                                <span class="slider"></span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="settings-actions">
+
+                        <button
+                            type="submit"
+                            class="primary-btn">
+
+                            <i class="fa-solid fa-floppy-disk"></i>
+
+                            Save Preferences
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+
+            <!-- DANGER ZONE -->
+
+            <div class="settings-card danger-card">
+
+                <div class="settings-card-header">
+
+                    <div class="settings-icon red">
+
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Data Management
+                        </h3>
+
+                        <p>
+                            Be careful when deleting application data.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="danger-btn"
+                    id="clearData">
+
+                    <i class="fa-solid fa-trash"></i>
+
+                    Clear Business Data
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <script src="js/settings.js"></script>
+
+</body>
+
+</html>

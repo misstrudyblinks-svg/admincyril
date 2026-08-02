@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | BizManager</title>
+
+    <link rel="stylesheet"
+        href="style.css">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+
+            <div>
+                <h2>BizManager</h2>
+                <span>Business System</span>
+            </div>
+
+        </div>
+
+
+        <!-- Navigation -->
+
+        <nav class="sidebar-nav">
+
+            <p class="menu-title">
+                MAIN MENU
+            </p>
+
+            <a href="dashboard.html"
+               class="nav-link active">
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+            <a href="orders.html" class="nav-link">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span>Orders</span>
+</a>
+
+            <a href="customers.html" class="nav-link">
+
+                <i class="fa-solid fa-users"></i>
+
+                <span>Customers</span>
+
+            </a>
+
+
+            <a href="products.html" class="nav-link">
+
+                <i class="fa-solid fa-box"></i>
+
+                <span>Products</span>
+
+            </a>
+
+
+            <a href="sales.html" class="nav-link">
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span>Sales</span>
+
+            </a>
+
+
+            <a href="expenses.html" class="nav-link">
+
+                <i class="fa-solid fa-money-bill-transfer"></i>
+
+                <span>Expenses</span>
+
+            </a>
+
+
+            <p class="menu-title">
+                MANAGEMENT
+            </p>
+
+
+            <a href="reports.html" class="nav-link">
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                <span>Reports</span>
+
+            </a>
+
+
+            <a href="invoices.html" class="nav-link">
+
+                <i class="fa-solid fa-file-invoice"></i>
+
+                <span>Invoices</span>
+
+            </a>
+
+
+            <a href="settings.html" class="nav-link">
+
+                <i class="fa-solid fa-gear"></i>
+
+                <span>Settings</span>
+
+            </a>
+
+            <a href="shop.html" class="nav-link">
+              <i class="fa-solid fa-store"></i>
+              <span>Visit Shop</span>
+            </a>
+
+        </nav>
+
+
+        <!-- Logout -->
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="logoutBtn"
+                class="logout-btn">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="dashboard-main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                class="menu-toggle"
+                id="menuToggle">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Dashboard</h1>
+
+                <p>
+                    Welcome back! Here's what's happening today.
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <button class="notification-btn">
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <span class="notification-dot"></span>
+
+                </button>
+
+
+
+                 
+                <div class="admin-user">
+
+    <img
+        src="images/KJPD4261.PNG"
+        alt="Admin Profile"
+        class="admin-profile-picture">
+
+    <div class="admin-user-info">
+
+        <strong>Administrator</strong>
+
+        <span>Admin</span>
+
+    </div>
+
+</div>
+
+                <!-- <div class="admin-profile">
+
+                    <div class="admin-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+
+                    <div class="admin-details">
+
+                        <strong>Admin</strong>
+
+                        <span>Administrator</span>
+
+                    </div>
+
+                    <i class="fa-solid fa-chevron-down profile-arrow"></i>
+
+                </div> -->
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =========================
+             DASHBOARD CONTENT
+        ========================== -->
+
+        <section class="dashboard-content">
+
+
+            <!-- STATISTICS -->
+
+            <div class="stats-grid">
+
+
+                <!-- Sales -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon purple">
+
+                        <i class="fa-solid fa-chart-line"></i>
+
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>Total Sales</span>
+
+                        <h2 id="totalSales">
+                            GH₵ 24,850
+                        </h2>
+
+                        <small class="positive">
+
+                            <i class="fa-solid fa-arrow-up"></i>
+
+                            12.5% this month
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Revenue -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon blue">
+
+                        <i class="fa-solid fa-money-bill-wave"></i>
+
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>Total Revenue</span>
+
+                        <h2 id="totalRevenue">
+                            GH₵ 48,750
+                        </h2>
+
+                        <small class="positive">
+
+                            <i class="fa-solid fa-arrow-up"></i>
+
+                            8.2% this month
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Customers -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon green">
+
+                        <i class="fa-solid fa-users"></i>
+
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>Customers</span>
+
+                        <h2 id="totalCustomers">
+                            248
+                        </h2>
+
+                        <small class="positive">
+
+                            <i class="fa-solid fa-arrow-up"></i>
+
+                            5.4% this month
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Products -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon orange">
+
+                        <i class="fa-solid fa-box"></i>
+
+                    </div>
+
+                    <div class="stat-info">
+
+                        <span>Products</span>
+
+                        <h2 id="totalProducts">
+                            156
+                        </h2>
+
+                        <small class="warning">
+
+                            <i class="fa-solid fa-circle-exclamation"></i>
+
+                            8 low stock
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- QUICK ACTIONS -->
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>Quick Actions</h2>
+
+                    <p>
+                        Manage your business quickly
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="quick-actions">
+
+
+                <button class="quick-card">
+
+                    <div class="quick-icon purple">
+
+                        <i class="fa-solid fa-user-plus"></i>
+
+                    </div>
+
+                    <span>Add Customer</span>
+
+                </button>
+
+
+                <button class="quick-card">
+
+                    <div class="quick-icon blue">
+
+                        <i class="fa-solid fa-plus"></i>
+
+                    </div>
+
+                    <span>Add Product</span>
+
+                </button>
+
+
+                <button class="quick-card">
+
+                    <div class="quick-icon green">
+
+                        <i class="fa-solid fa-cart-plus"></i>
+
+                    </div>
+
+                    <span>New Sale</span>
+
+                </button>
+
+
+                <button class="quick-card">
+
+                    <div class="quick-icon orange">
+
+                        <i class="fa-solid fa-receipt"></i>
+
+                    </div>
+
+                    <span>Create Invoice</span>
+
+                </button>
+
+            </div>
+
+
+
+            <!-- LOWER GRID -->
+
+            <div class="dashboard-grid">
+
+
+                <!-- RECENT SALES -->
+
+                <div class="dashboard-card sales-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h2>Recent Sales</h2>
+
+                            <p>
+                                Latest transactions
+                            </p>
+
+                        </div>
+
+                        <button class="view-all">
+                            View All
+                        </button>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Customer</th>
+
+                                    <th>Product</th>
+
+                                    <th>Amount</th>
+
+                                    <th>Status</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                          
+                            <tbody id="recentSalesBody"></tbody>
+                                
+
+                          
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- LOW STOCK -->
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h2>Low Stock</h2>
+
+                            <p>
+                                Products needing attention
+                            </p>
+
+                        </div>
+
+                        <button class="view-all">
+                            View All
+                        </button>
+
+                    </div>
+                    
+
+                    <div class="stock-list" id="lowStockList"></div>
+
+                   
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <script src="dashboard.js"></script>
+    <script src="auth.js"></script>
+   
+</body>
+
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Invoices | BizManager</title>
+
+    <link rel="stylesheet"
+          href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="sidebar-logo">
+
+                <i class="fa-solid fa-chart-line"></i>
+
+            </div>
+
+            <div>
+
+                <h2>BizManager</h2>
+
+                <span>Business System</span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <p class="menu-title">
+                MAIN MENU
+            </p>
+
+
+            <a href="dashboard.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a href="customers.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-users"></i>
+
+                <span>Customers</span>
+
+            </a>
+
+
+            <a href="products.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-box"></i>
+
+                <span>Products</span>
+
+            </a>
+
+
+            <a href="sales.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span>Sales</span>
+
+            </a>
+
+
+            <a href="expenses.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-money-bill-transfer"></i>
+
+                <span>Expenses</span>
+
+            </a>
+
+
+            <p class="menu-title">
+                MANAGEMENT
+            </p>
+
+
+            <a href="reports.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                <span>Reports</span>
+
+            </a>
+
+
+            <a href="invoices.html"
+               class="nav-link active">
+
+                <i class="fa-solid fa-file-invoice"></i>
+
+                <span>Invoices</span>
+
+            </a>
+
+
+            <a href="settings.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-gear"></i>
+
+                <span>Settings</span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutBtn"
+                    class="logout-btn">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- MAIN -->
+
+    <main class="dashboard-main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button class="menu-toggle"
+                    id="menuToggle">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Invoices</h1>
+
+                <p>
+                    Manage your business invoices
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <button class="notification-btn">
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <span class="notification-dot"></span>
+
+                </button>
+
+
+                <div class="admin-user">
+
+    <img
+        src="images/KJPD4261.PNG"
+        alt="Admin Profile"
+        class="admin-profile-picture">
+
+    <div class="admin-user-info">
+
+        <strong>Administrator</strong>
+
+        <span>Admin</span>
+
+    </div>
+
+</div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- CONTENT -->
+
+        <section class="dashboard-content">
+
+
+            <div class="customer-page-header">
+
+                <div>
+
+                    <h2>
+                        Invoice Management
+                    </h2>
+
+                    <p>
+                        View, print and manage customer invoices.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- STATS -->
+
+            <div class="customer-stats">
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon purple">
+
+                        <i class="fa-solid fa-file-invoice"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Total Invoices</span>
+
+                        <h2 id="invoiceCount">
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon green">
+
+                        <i class="fa-solid fa-money-bill-wave"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Total Invoiced</span>
+
+                        <h2 id="invoiceRevenue">
+                            GH₵0.00
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon blue">
+
+                        <i class="fa-solid fa-calendar-day"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Today's Invoices</span>
+
+                        <h2 id="todayInvoices">
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon orange">
+
+                        <i class="fa-solid fa-calculator"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Average Invoice</span>
+
+                        <h2 id="averageInvoice">
+                            GH₵0.00
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- INVOICE TABLE -->
+
+            <div class="customer-card">
+
+
+                <div class="customer-toolbar">
+
+                    <div>
+
+                        <h2>
+                            Invoice History
+                        </h2>
+
+                        <p>
+                            All generated invoices
+                        </p>
+
+                    </div>
+
+
+                    <div class="customer-search">
+
+                        <i class="fa-solid fa-search"></i>
+
+                        <input
+                            type="text"
+                            id="invoiceSearch"
+                            placeholder="Search invoices...">
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-table-container">
+
+                    <table class="customer-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Invoice
+                                </th>
+
+                                <th>
+                                    Customer
+                                </th>
+
+                                <th>
+                                    Amount
+                                </th>
+
+                                <th>
+                                    Payment
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Actions
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="invoiceTableBody">
+
+                        </tbody>
+
+                    </table>
+
+
+                    <div
+                        id="emptyInvoices"
+                        class="empty-customers">
+
+                        <i class="fa-solid fa-file-invoice"></i>
+
+                        <h3>
+                            No Invoices Yet
+                        </h3>
+
+                        <p>
+                            Invoices generated from sales will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- INVOICE VIEW MODAL -->
+
+    <div
+        class="modal-overlay"
+        id="invoiceModal">
+
+        <div class="invoice-modal">
+
+
+            <div class="invoice-actions">
+
+                <button
+                    class="cancel-btn"
+                    id="closeInvoice">
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                    Close
+
+                </button>
+
+
+                <button
+                    class="primary-btn"
+                    id="printInvoice">
+
+                    <i class="fa-solid fa-print"></i>
+
+                    Print / PDF
+
+                </button>
+
+            </div>
+
+
+            <div
+                class="invoice-paper"
+                id="invoicePaper">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script src="invoices.js"></script>
+    <script src="settings.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Reports | BizManager</title>
+
+    <link rel="stylesheet"
+          href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="sidebar-logo">
+
+                <i class="fa-solid fa-chart-line"></i>
+
+            </div>
+
+            <div>
+
+                <h2>BizManager</h2>
+
+                <span>Business System</span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <p class="menu-title">
+                MAIN MENU
+            </p>
+
+
+            <a href="dashboard.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a href="customers.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-users"></i>
+
+                <span>Customers</span>
+
+            </a>
+
+
+            <a href="products.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-box"></i>
+
+                <span>Products</span>
+
+            </a>
+
+
+            <a href="sales.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span>Sales</span>
+
+            </a>
+
+
+            <a href="expenses.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-money-bill-transfer"></i>
+
+                <span>Expenses</span>
+
+            </a>
+
+
+            <p class="menu-title">
+                MANAGEMENT
+            </p>
+
+
+            <a href="reports.html"
+               class="nav-link active">
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                <span>Reports</span>
+
+            </a>
+
+
+            <a href="invoices.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-file-invoice"></i>
+
+                <span>Invoices</span>
+
+            </a>
+
+
+            <a href="settings.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-gear"></i>
+
+                <span>Settings</span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutBtn"
+                    class="logout-btn">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- MAIN -->
+
+    <main class="dashboard-main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button class="menu-toggle"
+                    id="menuToggle">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Reports & Analytics</h1>
+
+                <p>
+                    Understand your business performance
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <button class="notification-btn">
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <span class="notification-dot"></span>
+
+                </button>
+
+
+                <div class="admin-user">
+
+    <img
+        src="images/KJPD4261.PNG"
+        alt="Admin Profile"
+        class="admin-profile-picture">
+
+    <div class="admin-user-info">
+
+        <strong>Administrator</strong>
+
+        <span>Admin</span>
+
+    </div>
+
+</div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- CONTENT -->
+
+        <section class="dashboard-content">
+
+
+            <!-- HEADER -->
+
+            <div class="customer-page-header">
+
+                <div>
+
+                    <h2>
+                        Business Analytics
+                    </h2>
+
+                    <p>
+                        Monitor your revenue, expenses and profit.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="primary-btn"
+                    id="refreshReports">
+
+                    <i class="fa-solid fa-rotate"></i>
+
+                    Refresh Reports
+
+                </button>
+
+            </div>
+
+
+
+            <!-- =========================
+                 FINANCIAL CARDS
+            ========================== -->
+
+            <div class="customer-stats">
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon green">
+
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Total Revenue</span>
+
+                        <h2 id="reportRevenue">
+                            GH₵0.00
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon red">
+
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Total Expenses</span>
+
+                        <h2 id="reportExpenses">
+                            GH₵0.00
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon purple">
+
+                        <i class="fa-solid fa-coins"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Net Profit</span>
+
+                        <h2 id="reportProfit">
+                            GH₵0.00
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon blue">
+
+                        <i class="fa-solid fa-cart-shopping"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Total Orders</span>
+
+                        <h2 id="reportOrders">
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 PERFORMANCE
+            ========================== -->
+
+            <div class="reports-grid">
+
+
+                <!-- REVENUE VS EXPENSE -->
+
+                <div class="report-card">
+
+                    <div class="report-card-header">
+
+                        <div>
+
+                            <h3>
+                                Revenue vs Expenses
+                            </h3>
+
+                            <p>
+                                Overall financial performance
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="bar-chart"
+                         id="financialChart">
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- PROFIT SUMMARY -->
+
+                <div class="report-card">
+
+                    <div class="report-card-header">
+
+                        <div>
+
+                            <h3>
+                                Profit Summary
+                            </h3>
+
+                            <p>
+                                Current financial position
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="profit-summary">
+
+
+                        <div class="profit-row">
+
+                            <span>
+                                Revenue
+                            </span>
+
+                            <strong
+                                id="summaryRevenue">
+
+                                GH₵0.00
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="profit-row">
+
+                            <span>
+                                Expenses
+                            </span>
+
+                            <strong
+                                id="summaryExpenses">
+
+                                GH₵0.00
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="profit-divider"></div>
+
+
+                        <div class="profit-row final">
+
+                            <span>
+                                Net Profit
+                            </span>
+
+                            <strong
+                                id="summaryProfit">
+
+                                GH₵0.00
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 TOP PRODUCTS
+            ========================== -->
+
+            <div class="customer-card">
+
+                <div class="customer-toolbar">
+
+                    <div>
+
+                        <h2>
+                            Top Selling Products
+                        </h2>
+
+                        <p>
+                            Products generating the most sales
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-table-container">
+
+                    <table class="customer-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Rank
+                                </th>
+
+                                <th>
+                                    Product
+                                </th>
+
+                                <th>
+                                    Units Sold
+                                </th>
+
+                                <th>
+                                    Revenue
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="topProductsTable">
+
+                        </tbody>
+
+                    </table>
+
+
+                    <div
+                        id="noProductReports"
+                        class="empty-customers">
+
+                        <i class="fa-solid fa-chart-column"></i>
+
+                        <h3>
+                            No Sales Data
+                        </h3>
+
+                        <p>
+                            Complete some sales to see product analytics.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 EXPENSE CATEGORIES
+            ========================== -->
+
+            <div class="customer-card">
+
+                <div class="customer-toolbar">
+
+                    <div>
+
+                        <h2>
+                            Expense Categories
+                        </h2>
+
+                        <p>
+                            Where your business money is going
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="expenseCategories"
+                    class="expense-category-list">
+
+                </div>
+
+
+                <div
+                    id="noExpenseReports"
+                    class="empty-customers">
+
+                    <i class="fa-solid fa-receipt"></i>
+
+                    <h3>
+                        No Expense Data
+                    </h3>
+
+                    <p>
+                        Add expenses to generate category reports.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <script src="reports.js"></script>
+    <script src="settings.js"></script>
+
+</body>
+
+</html>

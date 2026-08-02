@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Orders | BizManager</title>
+    
+    <link rel="stylesheet"
+          href="style.css">
+    <link rel="stylesheet"
+          href="orders.css">
+
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="shop-logo-icon">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+
+            <!-- <div>
+                <h2>BizManager</h2>
+                <span>Admin Panel</span>
+            </div> -->
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="dashboard.html" class="nav-link">
+                <i class="fa-solid fa-gauge"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="members.html" class="nav-link">
+                <i class="fa-solid fa-users"></i>
+                <span>Members</span>
+            </a>
+
+            <a href="products.html" class="nav-link">
+                <i class="fa-solid fa-box"></i>
+                <span>Products</span>
+            </a>
+
+            <a href="orders.html"
+               class="nav-link active">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Orders</span>
+            </a>
+
+            <a href="shop.html" class="nav-link">
+                <i class="fa-solid fa-store"></i>
+                <span>Visit Shop</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="login.html" class="nav-link">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="admin-main">
+
+        <!-- TOPBAR -->
+
+        <header class="admin-topbar">
+
+            <div>
+
+                <h1>
+                    Orders
+                </h1>
+
+                <p>
+                    Manage customer orders and sales.
+                </p>
+
+            </div>
+
+
+            <div class="admin-user">
+
+    <img
+        src="images/KJPD4261.PNG"
+        alt="Admin Profile"
+        class="admin-profile-picture">
+
+    <div class="admin-user-info">
+
+        <strong>Administrator</strong>
+
+        <span>Admin</span>
+
+    </div>
+
+</div>
+
+        </header>
+
+
+        <!-- STAT CARDS -->
+
+        <section class="order-stat-grid">
+
+            <div class="order-stat-card">
+
+                <div class="order-stat-icon purple">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Total Orders
+                    </span>
+
+                    <strong id="totalOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="order-stat-card">
+
+                <div class="order-stat-icon orange">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Pending
+                    </span>
+
+                    <strong id="pendingOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="order-stat-card">
+
+                <div class="order-stat-icon blue">
+                    <i class="fa-solid fa-truck"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Processing
+                    </span>
+
+                    <strong id="processingOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="order-stat-card">
+
+                <div class="order-stat-icon green">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Completed
+                    </span>
+
+                    <strong id="completedOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SALES -->
+
+        <section class="sales-summary-card">
+
+            <div>
+
+                <span>
+                    TOTAL SALES
+                </span>
+
+                <h2 id="totalSales">
+                    GH₵0.00
+                </h2>
+
+            </div>
+
+            <i class="fa-solid fa-chart-line"></i>
+
+        </section>
+
+
+        <!-- ORDERS -->
+
+        <section class="orders-section">
+
+            <div class="orders-toolbar">
+
+                <div class="orders-search">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="text"
+                        id="orderSearch"
+                        placeholder="Search order number or customer...">
+
+                </div>
+
+
+                <select id="orderStatusFilter">
+
+                    <option value="all">
+                        All Orders
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="Processing">
+                        Processing
+                    </option>
+
+                    <option value="Completed">
+                        Completed
+                    </option>
+
+                    <option value="Cancelled">
+                        Cancelled
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="orders-table-wrapper">
+
+                <table class="orders-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Order
+                            </th>
+
+                            <th>
+                                Customer
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Payment
+                            </th>
+
+                            <th>
+                                Total
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="ordersTableBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div
+                id="ordersEmpty"
+                class="orders-empty">
+
+                <i class="fa-solid fa-box-open"></i>
+
+                <h3>
+                    No Orders Found
+                </h3>
+
+                <p>
+                    Customer orders will appear here.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ORDER DETAILS MODAL -->
+
+    <div
+        class="order-modal-overlay"
+        id="orderModal">
+
+        <div class="order-modal">
+
+            <button
+                class="order-modal-close"
+                id="closeOrderModal">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+
+            <div
+                id="orderDetails">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="orders.js"></script>
+
+</body>
+
+</html>

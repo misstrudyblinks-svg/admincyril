@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Products | BizManager</title>
+
+    <link rel="stylesheet"
+          href="style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+
+            <div>
+                <h2>BizManager</h2>
+                <span>Business System</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <p class="menu-title">
+                MAIN MENU
+            </p>
+
+
+            <a href="dashboard.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a href="customers.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-users"></i>
+
+                <span>Customers</span>
+
+            </a>
+
+
+            <a href="products.html"
+               class="nav-link active">
+
+                <i class="fa-solid fa-box"></i>
+
+                <span>Products</span>
+
+            </a>
+
+
+            <a href="sales.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span>Sales</span>
+
+            </a>
+
+
+            <a href="expenses.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-money-bill-transfer"></i>
+
+                <span>Expenses</span>
+
+            </a>
+
+
+            <p class="menu-title">
+                MANAGEMENT
+            </p>
+
+
+            <a href="reports.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                <span>Reports</span>
+
+            </a>
+
+
+            <a href="invoices.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-file-invoice"></i>
+
+                <span>Invoices</span>
+
+            </a>
+
+
+            <a href="settings.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-gear"></i>
+
+                <span>Settings</span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutBtn"
+                    class="logout-btn">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="dashboard-main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button class="menu-toggle"
+                    id="menuToggle">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Products</h1>
+
+                <p>
+                    Manage your products and inventory
+                </p>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <button class="notification-btn">
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <span class="notification-dot"></span>
+
+                </button>
+
+
+               <div class="admin-user">
+
+    <img
+        src="images/KJPD4261.PNG"
+        alt="Admin Profile"
+        class="admin-profile-picture">
+
+    <div class="admin-user-info">
+
+        <strong>Administrator</strong>
+
+        <span>Admin</span>
+
+    </div>
+
+</div>
+                
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =========================
+             CONTENT
+        ========================== -->
+
+        <section class="dashboard-content">
+
+
+            <!-- PAGE HEADER -->
+
+            <div class="customer-page-header">
+
+                <div>
+
+                    <h2>Product Management</h2>
+
+                    <p>
+                        Manage products, prices and stock.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="primary-btn"
+                    id="openProductModal">
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Add Product
+
+                </button>
+
+            </div>
+
+
+
+            <!-- PRODUCT STATISTICS -->
+
+            <div class="customer-stats">
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon purple">
+
+                        <i class="fa-solid fa-box"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Total Products</span>
+
+                        <h2 id="productCount">
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon green">
+
+                        <i class="fa-solid fa-cubes"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Total Stock</span>
+
+                        <h2 id="totalStock">
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon blue">
+
+                        <i class="fa-solid fa-layer-group"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Categories</span>
+
+                        <h2 id="categoryCount">
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-stat-card">
+
+                    <div class="customer-stat-icon orange">
+
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Low Stock</span>
+
+                        <h2 id="lowStockCount">
+                            0
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PRODUCT TABLE -->
+
+            <div class="customer-card">
+
+
+                <div class="customer-toolbar">
+
+                    <div>
+
+                        <h2>All Products</h2>
+
+                        <p>
+                            Your inventory database
+                        </p>
+
+                    </div>
+
+
+                    <div class="customer-search">
+
+                        <i class="fa-solid fa-search"></i>
+
+                        <input
+                            type="text"
+                            id="productSearch"
+                            placeholder="Search products...">
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="customer-table-container">
+
+                    <table class="customer-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Product</th>
+
+                                <th>Category</th>
+
+                                <th>Price</th>
+
+                                <th>Stock</th>
+
+                                <th>Status</th>
+
+                                <th>Actions</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="productTableBody">
+
+                        </tbody>
+
+                    </table>
+
+
+                    <div
+                        id="emptyProducts"
+                        class="empty-customers">
+
+                        <i class="fa-solid fa-box-open"></i>
+
+                        <h3>No Products Yet</h3>
+
+                        <p>
+                            Add your first product to get started.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =========================
+         PRODUCT MODAL
+    ========================== -->
+
+    <div class="modal-overlay"
+         id="productModal">
+
+        <div class="customer-modal">
+
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2 id="productModalTitle">
+                        Add Product
+                    </h2>
+
+                    <p>
+                        Enter product information
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="close-modal"
+                    id="closeProductModal">
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+
+            <form id="productForm">
+
+
+                <input
+                    type="hidden"
+                    id="productId">
+
+
+                <!-- PRODUCT NAME -->
+
+             
+
+                     <div class="form-group">
+
+                        <label>
+                            Product Name
+                        </label>
+
+                        <div class="form-input">
+
+                           <i class="fa-solid fa-box"></i>
+
+                                <input
+                                type="text"
+                                id="productName"
+                                placeholder="Enter product name"
+                                required>
+
+                        </div>
+
+                    </div>
+
+
+                           <!-- PRODUCT PICTURE -->
+
+                        <div class="form-group">
+
+                               <label>
+                                    Product Picture
+                                </label>
+
+                             <input
+                                   type="file"
+                                   id="productImage"
+                                   accept="image/*">
+
+                             <img
+                              id="productImagePreview"
+                              style="
+                              width:120px;
+                              height:120px;
+                              object-fit:cover;
+                              border-radius:10px;
+                              margin-top:10px;
+                              display:none;
+                               "
+                            >
+
+                        </div>
+
+
+                <!-- CATEGORY -->
+
+                <div class="form-group">
+
+                    <label>
+                        Category
+                    </label>
+
+                    <select id="productCategory"
+                            required>
+
+                        <option value="">
+                            Select Category
+                        </option>
+
+                        <option value="Electronics">
+                            Electronics
+                        </option>
+
+                        <option value="Phones">
+                            Phones
+                        </option>
+
+                        <option value="Computers">
+                            Computers
+                        </option>
+
+                        <option value="Accessories">
+                            Accessories
+                        </option>
+
+                        <option value="Clothing">
+                            Clothing
+                        </option>
+
+                        <option value="Food">
+                            Food
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- PRICE + STOCK -->
+
+                <div class="form-row">
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Selling Price (GH₵)
+                        </label>
+
+                        <div class="form-input">
+
+                            <i class="fa-solid fa-money-bill"></i>
+
+                            <input
+                                type="number"
+                                id="productPrice"
+                                placeholder="0.00"
+                                min="0"
+                                step="0.01"
+                                required>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Stock Quantity
+                        </label>
+
+                        <div class="form-input">
+
+                            <i class="fa-solid fa-cubes"></i>
+
+                            <input
+                                type="number"
+                                id="productStock"
+                                placeholder="0"
+                                min="0"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- LOW STOCK LEVEL -->
+
+                <div class="form-group">
+
+                    <label>
+                        Low Stock Alert Level
+                    </label>
+
+                    <div class="form-input">
+
+                        <i class="fa-solid fa-bell"></i>
+
+                        <input
+                            type="number"
+                            id="lowStockLevel"
+                            value="5"
+                            min="0"
+                            required>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ACTIONS -->
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="cancel-btn"
+                        id="cancelProduct">
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="primary-btn">
+
+                        <i class="fa-solid fa-save"></i>
+
+                        Save Product
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <script src="products.js"></script>
+    <script src="settings.js"></script>
+
+</body>
+
+</html>
