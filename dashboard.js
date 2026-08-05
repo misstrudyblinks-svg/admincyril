@@ -1,6 +1,7 @@
 // ==========================================
 // BIZMANAGER DASHBOARD
 // FIREBASE FIRESTORE VERSION
+// REAL-TIME DASHBOARD
 // ==========================================
 
 
@@ -24,9 +25,6 @@ import {
 
 const isLoggedIn =
     localStorage.getItem("adminLoggedIn");
-
-
-// Protect dashboard
 
 if (isLoggedIn !== "true") {
 
@@ -205,6 +203,59 @@ function getProductName(product) {
 
 
 // ==========================================
+// GET PRODUCT LOW STOCK LEVEL
+// ==========================================
+
+function getProductLowStockLevel(product) {
+
+    return Number(
+        product.lowStock ??
+        5
+    );
+
+}
+
+
+// ==========================================
+// GET ORDER DATE
+// ==========================================
+
+function getOrderDate(order) {
+
+    // Your checkout saves date as an ISO string.
+    if (order.date) {
+
+        const date =
+            new Date(
+                order.date
+            );
+
+        if (!isNaN(date.getTime())) {
+
+            return date;
+
+        }
+
+    }
+
+
+    // Fallback for Firestore Timestamp
+    if (
+        order.createdAt &&
+        typeof order.createdAt.toDate === "function"
+    ) {
+
+        return order.createdAt.toDate();
+
+    }
+
+
+    return new Date(0);
+
+}
+
+
+// ==========================================
 // UPDATE DASHBOARD STATISTICS
 // ==========================================
 
@@ -219,8 +270,10 @@ function updateDashboardStats() {
         orders
             .filter(
                 order =>
-                    order.status !==
-                    "Cancelled"
+                    String(
+                        order.status || ""
+                    ).toLowerCase() !==
+                    "cancelled"
             )
             .reduce(
                 (
@@ -248,8 +301,10 @@ function updateDashboardStats() {
         orders
             .filter(
                 order =>
-                    order.status ===
-                    "Completed"
+                    String(
+                        order.status || ""
+                    ).toLowerCase() ===
+                    "completed"
             )
             .reduce(
                 (
@@ -290,7 +345,9 @@ function updateDashboardStats() {
             ) {
 
                 uniqueCustomers.add(
-                    customer.phone
+                    String(
+                        customer.phone
+                    ).trim()
                 );
 
             }
@@ -300,7 +357,10 @@ function updateDashboardStats() {
             ) {
 
                 uniqueCustomers.add(
-                    customer.email
+                    String(
+                        customer.email
+                    ).trim()
+                    .toLowerCase()
                 );
 
             }
@@ -322,7 +382,38 @@ function updateDashboardStats() {
 
 
     // ======================================
-    // DISPLAY
+    // LOW STOCK COUNT
+    // ======================================
+
+    const lowStockProducts =
+        products.filter(
+            product => {
+
+                const stock =
+                    getProductStock(
+                        product
+                    );
+
+                const lowStockLevel =
+                    getProductLowStockLevel(
+                        product
+                    );
+
+                return (
+                    stock <=
+                    lowStockLevel
+                );
+
+            }
+        );
+
+
+    const lowStockCount =
+        lowStockProducts.length;
+
+
+    // ======================================
+    // DISPLAY ELEMENTS
     // ======================================
 
     const totalSalesElement =
@@ -348,6 +439,16 @@ function updateDashboardStats() {
             "totalProducts"
         );
 
+
+    const lowStockSummary =
+        document.getElementById(
+            "lowStockSummary"
+        );
+
+
+    // ======================================
+    // UPDATE DISPLAY
+    // ======================================
 
     if (
         totalSalesElement
@@ -392,6 +493,33 @@ function updateDashboardStats() {
 
     }
 
+
+    if (
+        lowStockSummary
+    ) {
+
+        if (
+            lowStockCount === 0
+        ) {
+
+            lowStockSummary.textContent =
+                "No low stock products";
+
+        }
+
+        else {
+
+            lowStockSummary.textContent =
+                `${lowStockCount} low stock product${
+                    lowStockCount === 1
+                        ? ""
+                        : "s"
+                }`;
+
+        }
+
+    }
+
 }
 
 
@@ -408,10 +536,6 @@ function updateRecentSales() {
 
 
     if (!tableBody) {
-
-        console.warn(
-            "recentSalesBody was not found in dashboard.html"
-        );
 
         return;
 
@@ -464,12 +588,8 @@ function updateRecentSales() {
                 ) => {
 
                     return (
-                        new Date(
-                            b.date || 0
-                        ) -
-                        new Date(
-                            a.date || 0
-                        )
+                        getOrderDate(b) -
+                        getOrderDate(a)
                     );
 
                 }
@@ -481,7 +601,7 @@ function updateRecentSales() {
 
 
     // ======================================
-    // DISPLAY
+    // DISPLAY ORDERS
     // ======================================
 
     recentOrders.forEach(
@@ -501,6 +621,10 @@ function updateRecentSales() {
             const initials =
                 customerName
                     .split(" ")
+                    .filter(
+                        name =>
+                            name.trim()
+                    )
                     .map(
                         name =>
                             name
@@ -518,7 +642,8 @@ function updateRecentSales() {
                 order.items &&
                 order.items.length > 0
 
-                    ? order.items[0].name
+                    ? order.items[0].name ||
+                      "Product"
 
                     : "Order";
 
@@ -535,12 +660,14 @@ function updateRecentSales() {
 
 
             const statusClass =
-                status
-                    .toLowerCase()
-                    .replace(
-                        /\s+/g,
-                        "-"
-                    );
+                String(
+                    status
+                )
+                .toLowerCase()
+                .replace(
+                    /\s+/g,
+                    "-"
+                );
 
 
             row.innerHTML = `
@@ -552,15 +679,19 @@ function updateRecentSales() {
                         <div class="customer-avatar">
 
                             ${
-                                initials ||
-                                "CU"
+                                escapeHTML(
+                                    initials ||
+                                    "CU"
+                                )
                             }
 
                         </div>
 
                         <span>
 
-                            ${customerName}
+                            ${escapeHTML(
+                                customerName
+                            )}
 
                         </span>
 
@@ -571,7 +702,9 @@ function updateRecentSales() {
 
                 <td>
 
-                    ${firstProduct}
+                    ${escapeHTML(
+                        firstProduct
+                    )}
 
                     ${
                         order.items &&
@@ -599,10 +732,14 @@ function updateRecentSales() {
                 <td>
 
                     <span
-                        class="status ${statusClass}"
+                        class="status ${escapeHTML(
+                            statusClass
+                        )}"
                     >
 
-                        ${status}
+                        ${escapeHTML(
+                            status
+                        )}
 
                     </span>
 
@@ -635,10 +772,6 @@ function updateLowStock() {
 
     if (!lowStockContainer) {
 
-        console.warn(
-            "lowStockList was not found in dashboard.html"
-        );
-
         return;
 
     }
@@ -653,10 +786,24 @@ function updateLowStock() {
 
     const lowStockProducts =
         products.filter(
-            product =>
-                getProductStock(
-                    product
-                ) <= 5
+            product => {
+
+                const stock =
+                    getProductStock(
+                        product
+                    );
+
+                const lowStockLevel =
+                    getProductLowStockLevel(
+                        product
+                    );
+
+                return (
+                    stock <=
+                    lowStockLevel
+                );
+
+            }
         );
 
 
@@ -752,11 +899,13 @@ function updateLowStock() {
 
                 const icon =
                     product.category &&
-                    product.category
-                        .toLowerCase()
-                        .includes(
-                            "phone"
-                        )
+                    String(
+                        product.category
+                    )
+                    .toLowerCase()
+                    .includes(
+                        "phone"
+                    )
 
                         ? "fa-mobile-screen"
 
@@ -791,8 +940,10 @@ function updateLowStock() {
 
                         <strong>
 
-                            ${getProductName(
-                                product
+                            ${escapeHTML(
+                                getProductName(
+                                    product
+                                )
                             )}
 
                         </strong>
@@ -801,8 +952,10 @@ function updateLowStock() {
                         <span>
 
                             ${
-                                product.category ||
-                                "Product"
+                                escapeHTML(
+                                    product.category ||
+                                    "Product"
+                                )
                             }
 
                         </span>
@@ -856,10 +1009,15 @@ function refreshDashboard() {
 
 
 // ==========================================
-// FIREBASE ORDERS LISTENER
+// FIREBASE ORDERS REAL-TIME LISTENER
 // ==========================================
 
 function loadOrdersFromFirebase() {
+
+    console.log(
+        "Starting Firebase orders listener..."
+    );
+
 
     onSnapshot(
 
@@ -881,7 +1039,7 @@ function loadOrdersFromFirebase() {
 
 
             console.log(
-                "Dashboard orders loaded:",
+                "Dashboard orders updated:",
                 orders
             );
 
@@ -893,7 +1051,7 @@ function loadOrdersFromFirebase() {
         error => {
 
             console.error(
-                "Firebase orders error:",
+                "Firebase orders listener error:",
                 error
             );
 
@@ -905,10 +1063,15 @@ function loadOrdersFromFirebase() {
 
 
 // ==========================================
-// FIREBASE PRODUCTS LISTENER
+// FIREBASE PRODUCTS REAL-TIME LISTENER
 // ==========================================
 
 function loadProductsFromFirebase() {
+
+    console.log(
+        "Starting Firebase products listener..."
+    );
+
 
     onSnapshot(
 
@@ -930,7 +1093,7 @@ function loadProductsFromFirebase() {
 
 
             console.log(
-                "Dashboard products loaded:",
+                "Dashboard products updated:",
                 products
             );
 
@@ -942,7 +1105,7 @@ function loadProductsFromFirebase() {
         error => {
 
             console.error(
-                "Firebase products error:",
+                "Firebase products listener error:",
                 error
             );
 
@@ -964,6 +1127,7 @@ const addCustomerBtn =
     document.getElementById(
         "addCustomerBtn"
     );
+
 
 if (addCustomerBtn) {
 
@@ -987,6 +1151,7 @@ const addProductBtn =
         "addProductBtn"
     );
 
+
 if (addProductBtn) {
 
     addProductBtn.addEventListener(
@@ -1009,6 +1174,7 @@ const newSaleBtn =
         "newSaleBtn"
     );
 
+
 if (newSaleBtn) {
 
     newSaleBtn.addEventListener(
@@ -1030,6 +1196,7 @@ const createInvoiceBtn =
     document.getElementById(
         "createInvoiceBtn"
     );
+
 
 if (createInvoiceBtn) {
 
@@ -1055,6 +1222,7 @@ const viewAllOrdersBtn =
         "viewAllOrdersBtn"
     );
 
+
 if (viewAllOrdersBtn) {
 
     viewAllOrdersBtn.addEventListener(
@@ -1079,6 +1247,7 @@ const viewAllProductsBtn =
         "viewAllProductsBtn"
     );
 
+
 if (viewAllProductsBtn) {
 
     viewAllProductsBtn.addEventListener(
@@ -1093,21 +1262,39 @@ if (viewAllProductsBtn) {
 
 }
 
-const lowStockSummary =
-    document.getElementById("lowStockSummary");
 
-if (lowStockSummary) {
+// ==========================================
+// HTML ESCAPE
+// ==========================================
 
-    lowStockSummary.textContent =
-        lowStockProducts.length === 0
-            ? "No low stock products"
-            : `${lowStockProducts.length} low stock product${
-                lowStockProducts.length === 1
-                    ? ""
-                    : "s"
-            }`;
+function escapeHTML(value) {
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
 
 }
+
 
 // ==========================================
 // START FIREBASE LISTENERS
