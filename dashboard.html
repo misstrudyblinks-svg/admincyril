@@ -42,13 +42,14 @@
         </div>
 
 
-        <!-- Navigation -->
+        <!-- NAVIGATION -->
 
         <nav class="sidebar-nav">
 
             <p class="menu-title">
                 MAIN MENU
             </p>
+
 
             <a href="dashboard.html"
                class="nav-link active">
@@ -59,12 +60,19 @@
 
             </a>
 
-            <a href="orders.html" class="nav-link">
-    <i class="fa-solid fa-cart-shopping"></i>
-    <span>Orders</span>
-</a>
 
-            <a href="customers.html" class="nav-link">
+            <a href="orders.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span>Orders</span>
+
+            </a>
+
+
+            <a href="customers.html"
+               class="nav-link">
 
                 <i class="fa-solid fa-users"></i>
 
@@ -73,7 +81,8 @@
             </a>
 
 
-            <a href="products.html" class="nav-link">
+            <a href="products.html"
+               class="nav-link">
 
                 <i class="fa-solid fa-box"></i>
 
@@ -82,7 +91,8 @@
             </a>
 
 
-            <a href="sales.html" class="nav-link">
+            <a href="sales.html"
+               class="nav-link">
 
                 <i class="fa-solid fa-cart-shopping"></i>
 
@@ -91,7 +101,8 @@
             </a>
 
 
-            <a href="expenses.html" class="nav-link">
+            <a href="expenses.html"
+               class="nav-link">
 
                 <i class="fa-solid fa-money-bill-transfer"></i>
 
@@ -105,7 +116,8 @@
             </p>
 
 
-            <a href="reports.html" class="nav-link">
+            <a href="reports.html"
+               class="nav-link">
 
                 <i class="fa-solid fa-chart-column"></i>
 
@@ -114,7 +126,8 @@
             </a>
 
 
-            <a href="invoices.html" class="nav-link">
+            <a href="invoices.html"
+               class="nav-link">
 
                 <i class="fa-solid fa-file-invoice"></i>
 
@@ -123,7 +136,8 @@
             </a>
 
 
-            <a href="settings.html" class="nav-link">
+            <a href="settings.html"
+               class="nav-link">
 
                 <i class="fa-solid fa-gear"></i>
 
@@ -131,15 +145,20 @@
 
             </a>
 
-            <a href="shop.html" class="nav-link">
-              <i class="fa-solid fa-store"></i>
-              <span>Visit Shop</span>
+
+            <a href="shop.html"
+               class="nav-link">
+
+                <i class="fa-solid fa-store"></i>
+
+                <span>Visit Shop</span>
+
             </a>
 
         </nav>
 
 
-        <!-- Logout -->
+        <!-- LOGOUT -->
 
         <div class="sidebar-bottom">
 
@@ -192,7 +211,9 @@
 
             <div class="topbar-actions">
 
-                <button class="notification-btn">
+                <button
+                    class="notification-btn"
+                    type="button">
 
                     <i class="fa-regular fa-bell"></i>
 
@@ -201,42 +222,26 @@
                 </button>
 
 
-
-                 
                 <div class="admin-user">
 
-    <img
-        src="images/KJPD4261.PNG"
-        alt="Admin Profile"
-        class="admin-profile-picture">
+                    <img
+                        src="images/KJPD4261.PNG"
+                        alt="Admin Profile"
+                        class="admin-profile-picture">
 
-    <div class="admin-user-info">
+                    <div class="admin-user-info">
 
-        <strong>Administrator</strong>
+                        <strong>
+                            Administrator
+                        </strong>
 
-        <span>Admin</span>
-
-    </div>
-
-</div>
-
-                <!-- <div class="admin-profile">
-
-                    <div class="admin-avatar">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-
-                    <div class="admin-details">
-
-                        <strong>Admin</strong>
-
-                        <span>Administrator</span>
+                        <span>
+                            Admin
+                        </span>
 
                     </div>
 
-                    <i class="fa-solid fa-chevron-down profile-arrow"></i>
-
-                </div> -->
+                </div>
 
             </div>
 
@@ -251,12 +256,14 @@
         <section class="dashboard-content">
 
 
-            <!-- STATISTICS -->
+            <!-- =========================
+                 STATISTICS
+            ========================== -->
 
             <div class="stats-grid">
 
 
-                <!-- Sales -->
+                <!-- TOTAL SALES -->
 
                 <div class="stat-card">
 
@@ -266,20 +273,21 @@
 
                     </div>
 
+
                     <div class="stat-info">
 
-                        <span>Total Sales</span>
+                        <span>
+                            Total Sales
+                        </span>
+
 
                         <h2 id="totalSales">
-                            GH₵ 24,850
+                            GH₵ 0.00
                         </h2>
 
-                        <small class="positive">
 
-                            <i class="fa-solid fa-arrow-up"></i>
-
-                            12.5% this month
-
+                        <small>
+                            All non-cancelled orders
                         </small>
 
                     </div>
@@ -287,7 +295,8 @@
                 </div>
 
 
-                <!-- Revenue -->
+
+                <!-- TOTAL REVENUE -->
 
                 <div class="stat-card">
 
@@ -297,20 +306,21 @@
 
                     </div>
 
+
                     <div class="stat-info">
 
-                        <span>Total Revenue</span>
+                        <span>
+                            Total Revenue
+                        </span>
+
 
                         <h2 id="totalRevenue">
-                            GH₵ 48,750
+                            GH₵ 0.00
                         </h2>
 
-                        <small class="positive">
 
-                            <i class="fa-solid fa-arrow-up"></i>
-
-                            8.2% this month
-
+                        <small>
+                            Completed orders
                         </small>
 
                     </div>
@@ -318,7 +328,8 @@
                 </div>
 
 
-                <!-- Customers -->
+
+                <!-- CUSTOMERS -->
 
                 <div class="stat-card">
 
@@ -328,20 +339,21 @@
 
                     </div>
 
+
                     <div class="stat-info">
 
-                        <span>Customers</span>
+                        <span>
+                            Customers
+                        </span>
+
 
                         <h2 id="totalCustomers">
-                            248
+                            0
                         </h2>
 
-                        <small class="positive">
 
-                            <i class="fa-solid fa-arrow-up"></i>
-
-                            5.4% this month
-
+                        <small>
+                            Customers with orders
                         </small>
 
                     </div>
@@ -349,7 +361,8 @@
                 </div>
 
 
-                <!-- Products -->
+
+                <!-- PRODUCTS -->
 
                 <div class="stat-card">
 
@@ -359,20 +372,21 @@
 
                     </div>
 
+
                     <div class="stat-info">
 
-                        <span>Products</span>
+                        <span>
+                            Products
+                        </span>
+
 
                         <h2 id="totalProducts">
-                            156
+                            0
                         </h2>
 
-                        <small class="warning">
 
-                            <i class="fa-solid fa-circle-exclamation"></i>
-
-                            8 low stock
-
+                        <small id="lowStockSummary">
+                            Checking stock...
                         </small>
 
                     </div>
@@ -383,13 +397,17 @@
 
 
 
-            <!-- QUICK ACTIONS -->
+            <!-- =========================
+                 QUICK ACTIONS
+            ========================== -->
 
             <div class="section-header">
 
                 <div>
 
-                    <h2>Quick Actions</h2>
+                    <h2>
+                        Quick Actions
+                    </h2>
 
                     <p>
                         Manage your business quickly
@@ -403,7 +421,12 @@
             <div class="quick-actions">
 
 
-                <button class="quick-card">
+                <!-- ADD CUSTOMER -->
+
+                <button
+                    class="quick-card"
+                    id="addCustomerBtn"
+                    type="button">
 
                     <div class="quick-icon purple">
 
@@ -411,12 +434,20 @@
 
                     </div>
 
-                    <span>Add Customer</span>
+                    <span>
+                        Add Customer
+                    </span>
 
                 </button>
 
 
-                <button class="quick-card">
+
+                <!-- ADD PRODUCT -->
+
+                <button
+                    class="quick-card"
+                    id="addProductBtn"
+                    type="button">
 
                     <div class="quick-icon blue">
 
@@ -424,12 +455,20 @@
 
                     </div>
 
-                    <span>Add Product</span>
+                    <span>
+                        Add Product
+                    </span>
 
                 </button>
 
 
-                <button class="quick-card">
+
+                <!-- NEW SALE -->
+
+                <button
+                    class="quick-card"
+                    id="newSaleBtn"
+                    type="button">
 
                     <div class="quick-icon green">
 
@@ -437,12 +476,20 @@
 
                     </div>
 
-                    <span>New Sale</span>
+                    <span>
+                        New Sale
+                    </span>
 
                 </button>
 
 
-                <button class="quick-card">
+
+                <!-- CREATE INVOICE -->
+
+                <button
+                    class="quick-card"
+                    id="createInvoiceBtn"
+                    type="button">
 
                     <div class="quick-icon orange">
 
@@ -450,7 +497,9 @@
 
                     </div>
 
-                    <span>Create Invoice</span>
+                    <span>
+                        Create Invoice
+                    </span>
 
                 </button>
 
@@ -458,12 +507,16 @@
 
 
 
-            <!-- LOWER GRID -->
+            <!-- =========================
+                 LOWER GRID
+            ========================== -->
 
             <div class="dashboard-grid">
 
 
-                <!-- RECENT SALES -->
+                <!-- =========================
+                     RECENT SALES
+                ========================== -->
 
                 <div class="dashboard-card sales-card">
 
@@ -471,7 +524,9 @@
 
                         <div>
 
-                            <h2>Recent Sales</h2>
+                            <h2>
+                                Recent Sales
+                            </h2>
 
                             <p>
                                 Latest transactions
@@ -479,8 +534,14 @@
 
                         </div>
 
-                        <button class="view-all">
+
+                        <button
+                            class="view-all"
+                            id="viewAllOrdersBtn"
+                            type="button">
+
                             View All
+
                         </button>
 
                     </div>
@@ -494,24 +555,31 @@
 
                                 <tr>
 
-                                    <th>Customer</th>
+                                    <th>
+                                        Customer
+                                    </th>
 
-                                    <th>Product</th>
+                                    <th>
+                                        Product
+                                    </th>
 
-                                    <th>Amount</th>
+                                    <th>
+                                        Amount
+                                    </th>
 
-                                    <th>Status</th>
+                                    <th>
+                                        Status
+                                    </th>
 
                                 </tr>
 
                             </thead>
 
 
-                          
-                            <tbody id="recentSalesBody"></tbody>
-                                
+                            <tbody
+                                id="recentSalesBody">
 
-                          
+                            </tbody>
 
                         </table>
 
@@ -521,7 +589,9 @@
 
 
 
-                <!-- LOW STOCK -->
+                <!-- =========================
+                     LOW STOCK
+                ========================== -->
 
                 <div class="dashboard-card">
 
@@ -529,7 +599,9 @@
 
                         <div>
 
-                            <h2>Low Stock</h2>
+                            <h2>
+                                Low Stock
+                            </h2>
 
                             <p>
                                 Products needing attention
@@ -537,16 +609,25 @@
 
                         </div>
 
-                        <button class="view-all">
+
+                        <button
+                            class="view-all"
+                            id="viewAllProductsBtn"
+                            type="button">
+
                             View All
+
                         </button>
 
                     </div>
-                    
 
-                    <div class="stock-list" id="lowStockList"></div>
 
-                   
+                    <div
+                        class="stock-list"
+                        id="lowStockList">
+
+                    </div>
+
                 </div>
 
             </div>
@@ -557,9 +638,21 @@
 
 
 
-    <script src="dashboard.js"></script>
-    <script src="auth.js"></script>
-   
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script
+        type="module"
+        src="dashboard.js">
+    </script>
+
+
+    <script
+        src="auth.js">
+    </script>
+
+
 </body>
 
 </html>

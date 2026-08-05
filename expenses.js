@@ -1,6 +1,27 @@
 // ==========================================
-// EXPENSE MANAGEMENT SYSTEM
+// BIZMANAGER EXPENSE MANAGEMENT
+// FIREBASE FIRESTORE VERSION
 // ==========================================
+
+
+// ==========================================
+// FIREBASE IMPORTS
+// ==========================================
+
+import {
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import {
+    db
+} from "./firebase-config.js";
 
 
 // ==========================================
@@ -18,13 +39,11 @@ if (loggedIn !== "true") {
 
 
 // ==========================================
-// DATABASE
+// FIREBASE COLLECTION
 // ==========================================
 
-let expenses =
-    JSON.parse(
-        localStorage.getItem("expenses")
-    ) || [];
+const expensesCollection =
+    collection(db, "expenses");
 
 
 // ==========================================
@@ -78,7 +97,111 @@ const expenseSearch =
 
 
 // ==========================================
-// OPEN MODAL
+// EXPENSE DATA
+// ==========================================
+
+let expenses = [];
+
+
+// ==========================================
+// LOAD EXPENSES FROM FIREBASE
+// ==========================================
+
+async function loadExpenses() {
+
+    try {
+
+        expenseTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    Loading expenses...
+                </td>
+            </tr>
+        `;
+
+
+        // ==================================
+        // GET EXPENSES
+        // ==================================
+
+        const expenseQuery =
+            query(
+                expensesCollection,
+                orderBy("date", "desc")
+            );
+
+
+        const snapshot =
+            await getDocs(
+                expenseQuery
+            );
+
+
+        expenses = [];
+
+
+        snapshot.forEach(
+            documentSnapshot => {
+
+                expenses.push({
+
+                    id:
+                        documentSnapshot.id,
+
+                    ...documentSnapshot.data()
+
+                });
+
+            }
+        );
+
+
+        renderExpenses();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error loading expenses:",
+            error
+        );
+
+
+        expenseTableBody.innerHTML = "";
+
+
+        emptyExpenses.style.display =
+            "block";
+
+
+        emptyExpenses.innerHTML = `
+
+            <i class="fa-solid fa-triangle-exclamation"></i>
+
+            <h3>
+                Expenses could not be loaded
+            </h3>
+
+            <p>
+                ${error.message}
+            </p>
+
+        `;
+
+
+        alert(
+            "Expenses could not be loaded.\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// OPEN EXPENSE MODAL
 // ==========================================
 
 openExpenseModal.addEventListener(
@@ -87,29 +210,39 @@ openExpenseModal.addEventListener(
 
         expenseForm.reset();
 
+
         expenseId.value = "";
+
+
+        // Set today's date
 
         expenseDate.value =
             new Date()
                 .toISOString()
                 .split("T")[0];
 
+
         expenseModalTitle.textContent =
             "Add Expense";
 
-        expenseModal.classList.add("show");
+
+        expenseModal.classList.add(
+            "show"
+        );
 
     }
 );
 
 
 // ==========================================
-// CLOSE MODAL
+// CLOSE EXPENSE MODAL
 // ==========================================
 
 function closeExpenseModalFunction() {
 
-    expenseModal.classList.remove("show");
+    expenseModal.classList.remove(
+        "show"
+    );
 
 }
 
@@ -126,12 +259,17 @@ cancelExpense.addEventListener(
 );
 
 
+// ==========================================
+// CLOSE WHEN CLICKING OUTSIDE
+// ==========================================
+
 expenseModal.addEventListener(
     "click",
     function (event) {
 
         if (
-            event.target === expenseModal
+            event.target ===
+            expenseModal
         ) {
 
             closeExpenseModalFunction();
@@ -148,7 +286,7 @@ expenseModal.addEventListener(
 
 expenseForm.addEventListener(
     "submit",
-    function (event) {
+    async function (event) {
 
         event.preventDefault();
 
@@ -157,35 +295,57 @@ expenseForm.addEventListener(
             expenseId.value;
 
 
-        const expenseData = {
+        const description =
+            expenseDescription.value.trim();
 
-            id:
-                id ||
-                "EXP-" +
-                Date.now(),
 
-            description:
-                expenseDescription.value.trim(),
+        const category =
+            expenseCategory.value;
 
-            category:
-                expenseCategory.value,
 
-            amount:
-                Number(
-                    expenseAmount.value
-                ),
+        const amount =
+            Number(
+                expenseAmount.value
+            );
 
-            date:
-                expenseDate.value,
 
-            notes:
-                expenseNotes.value.trim()
+        const date =
+            expenseDate.value;
 
-        };
+
+        const notes =
+            expenseNotes.value.trim();
+
+
+        // ==================================
+        // VALIDATION
+        // ==================================
+
+        if (!description) {
+
+            alert(
+                "Please enter the expense description."
+            );
+
+            return;
+
+        }
+
+
+        if (!category) {
+
+            alert(
+                "Please select an expense category."
+            );
+
+            return;
+
+        }
 
 
         if (
-            expenseData.amount <= 0
+            !amount ||
+            amount <= 0
         ) {
 
             alert(
@@ -197,44 +357,125 @@ expenseForm.addEventListener(
         }
 
 
-        // EDIT
+        if (!date) {
 
-        if (id) {
+            alert(
+                "Please select the expense date."
+            );
 
-            expenses =
-                expenses.map(
-                    expense =>
-
-                        expense.id === id
-                            ? expenseData
-                            : expense
-
-                );
+            return;
 
         }
 
-        // ADD
 
-        else {
+        try {
 
-            expenses.unshift(
-                expenseData
+            // ==================================
+            // EXPENSE DATA
+            // ==================================
+
+            const expenseData = {
+
+                description:
+                    description,
+
+                category:
+                    category,
+
+                amount:
+                    amount,
+
+                date:
+                    date,
+
+                notes:
+                    notes,
+
+                updatedAt:
+                    new Date().toISOString()
+
+            };
+
+
+            // ==================================
+            // EDIT EXPENSE
+            // ==================================
+
+            if (id) {
+
+                const expenseRef =
+                    doc(
+                        db,
+                        "expenses",
+                        id
+                    );
+
+
+                await updateDoc(
+                    expenseRef,
+                    expenseData
+                );
+
+
+                alert(
+                    "Expense updated successfully!"
+                );
+
+            }
+
+
+            // ==================================
+            // ADD EXPENSE
+            // ==================================
+
+            else {
+
+                expenseData.createdAt =
+                    new Date().toISOString();
+
+
+                await addDoc(
+                    expensesCollection,
+                    expenseData
+                );
+
+
+                alert(
+                    "Expense added successfully!"
+                );
+
+            }
+
+
+            // ==================================
+            // CLOSE MODAL
+            // ==================================
+
+            closeExpenseModalFunction();
+
+
+            // ==================================
+            // RELOAD FIREBASE DATA
+            // ==================================
+
+            await loadExpenses();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Error saving expense:",
+                error
+            );
+
+
+            alert(
+                "Expense could not be saved.\n\n" +
+                error.message
             );
 
         }
-
-
-        // SAVE
-
-        localStorage.setItem(
-            "expenses",
-            JSON.stringify(expenses)
-        );
-
-
-        closeExpenseModalFunction();
-
-        renderExpenses();
 
     }
 );
@@ -252,30 +493,68 @@ function renderExpenses(
 
 
     const search =
-        searchTerm.toLowerCase();
+        searchTerm
+            .toLowerCase()
+            .trim();
 
 
     const filteredExpenses =
         expenses.filter(
-            expense =>
+            expense => {
 
-                expense.id
-                    .toLowerCase()
-                    .includes(search)
+                const id =
+                    (
+                        expense.id ||
+                        ""
+                    ).toLowerCase();
 
-                ||
 
-                expense.description
-                    .toLowerCase()
-                    .includes(search)
+                const description =
+                    (
+                        expense.description ||
+                        ""
+                    ).toLowerCase();
 
-                ||
 
-                expense.category
-                    .toLowerCase()
-                    .includes(search)
+                const category =
+                    (
+                        expense.category ||
+                        ""
+                    ).toLowerCase();
+
+
+                const notes =
+                    (
+                        expense.notes ||
+                        ""
+                    ).toLowerCase();
+
+
+                return (
+
+                    id.includes(search)
+
+                    ||
+
+                    description.includes(search)
+
+                    ||
+
+                    category.includes(search)
+
+                    ||
+
+                    notes.includes(search)
+
+                );
+
+            }
         );
 
+
+    // ==================================
+    // EMPTY STATE
+    // ==================================
 
     if (
         filteredExpenses.length === 0
@@ -294,11 +573,23 @@ function renderExpenses(
     }
 
 
+    // ==================================
+    // CREATE TABLE ROWS
+    // ==================================
+
     filteredExpenses.forEach(
         expense => {
 
             const row =
-                document.createElement("tr");
+                document.createElement(
+                    "tr"
+                );
+
+
+            const amount =
+                Number(
+                    expense.amount || 0
+                );
 
 
             row.innerHTML = `
@@ -318,7 +609,7 @@ function renderExpenses(
 
                     <strong>
 
-                        ${expense.description}
+                        ${expense.description || "-"}
 
                     </strong>
 
@@ -327,7 +618,7 @@ function renderExpenses(
 
                 <td>
 
-                    ${expense.category}
+                    ${expense.category || "-"}
 
                 </td>
 
@@ -336,7 +627,7 @@ function renderExpenses(
 
                     <span class="expense-amount">
 
-                        GH₵${expense.amount.toFixed(2)}
+                        GH₵${amount.toFixed(2)}
 
                     </span>
 
@@ -360,7 +651,9 @@ function renderExpenses(
 
                         <button
                             class="customer-action-btn edit-btn"
-                            onclick="editExpense('${expense.id}')">
+                            data-action="edit"
+                            data-id="${expense.id}"
+                            title="Edit Expense">
 
                             <i class="fa-solid fa-pen"></i>
 
@@ -369,7 +662,9 @@ function renderExpenses(
 
                         <button
                             class="customer-action-btn delete-btn"
-                            onclick="deleteExpense('${expense.id}')">
+                            data-action="delete"
+                            data-id="${expense.id}"
+                            title="Delete Expense">
 
                             <i class="fa-solid fa-trash"></i>
 
@@ -382,7 +677,49 @@ function renderExpenses(
             `;
 
 
-            expenseTableBody.appendChild(row);
+            // ==================================
+            // EDIT BUTTON
+            // ==================================
+
+            row
+                .querySelector(
+                    '[data-action="edit"]'
+                )
+                .addEventListener(
+                    "click",
+                    function () {
+
+                        editExpense(
+                            expense.id
+                        );
+
+                    }
+                );
+
+
+            // ==================================
+            // DELETE BUTTON
+            // ==================================
+
+            row
+                .querySelector(
+                    '[data-action="delete"]'
+                )
+                .addEventListener(
+                    "click",
+                    function () {
+
+                        deleteExpense(
+                            expense.id
+                        );
+
+                    }
+                );
+
+
+            expenseTableBody.appendChild(
+                row
+            );
 
         }
     );
@@ -406,23 +743,36 @@ function editExpense(id) {
         );
 
 
-    if (!expense) return;
+    if (!expense) {
+
+        alert(
+            "Expense not found."
+        );
+
+        return;
+
+    }
 
 
     expenseId.value =
         expense.id;
 
+
     expenseDescription.value =
-        expense.description;
+        expense.description || "";
+
 
     expenseCategory.value =
-        expense.category;
+        expense.category || "";
+
 
     expenseAmount.value =
-        expense.amount;
+        expense.amount || "";
+
 
     expenseDate.value =
-        expense.date;
+        expense.date || "";
+
 
     expenseNotes.value =
         expense.notes || "";
@@ -432,7 +782,9 @@ function editExpense(id) {
         "Edit Expense";
 
 
-    expenseModal.classList.add("show");
+    expenseModal.classList.add(
+        "show"
+    );
 
 }
 
@@ -441,7 +793,7 @@ function editExpense(id) {
 // DELETE EXPENSE
 // ==========================================
 
-function deleteExpense(id) {
+async function deleteExpense(id) {
 
     const expense =
         expenses.find(
@@ -450,32 +802,72 @@ function deleteExpense(id) {
         );
 
 
-    if (!expense) return;
+    if (!expense) {
+
+        alert(
+            "Expense not found."
+        );
+
+        return;
+
+    }
 
 
     const confirmed =
         confirm(
-            `Delete ${expense.description}?`
+            `Delete ${expense.description || "this expense"}?`
         );
 
 
-    if (!confirmed) return;
+    if (!confirmed) {
+
+        return;
+
+    }
 
 
-    expenses =
-        expenses.filter(
-            expense =>
-                expense.id !== id
+    try {
+
+        // ==================================
+        // DELETE FROM FIREBASE
+        // ==================================
+
+        await deleteDoc(
+            doc(
+                db,
+                "expenses",
+                id
+            )
         );
 
 
-    localStorage.setItem(
-        "expenses",
-        JSON.stringify(expenses)
-    );
+        alert(
+            "Expense deleted successfully!"
+        );
 
 
-    renderExpenses();
+        // ==================================
+        // RELOAD DATA
+        // ==================================
+
+        await loadExpenses();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error deleting expense:",
+            error
+        );
+
+
+        alert(
+            "Expense could not be deleted.\n\n" +
+            error.message
+        );
+
+    }
 
 }
 
@@ -502,13 +894,29 @@ expenseSearch.addEventListener(
 
 function formatDate(dateString) {
 
-    if (!dateString) return "-";
+    if (!dateString) {
+
+        return "-";
+
+    }
 
 
     const date =
         new Date(
-            dateString + "T00:00:00"
+            dateString +
+            "T00:00:00"
         );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "-";
+
+    }
 
 
     return date.toLocaleDateString(
@@ -524,27 +932,37 @@ function formatDate(dateString) {
 
 
 // ==========================================
-// STATISTICS
+// EXPENSE STATISTICS
 // ==========================================
 
 function updateExpenseStatistics() {
 
-
-    // TOTAL
+    // ==================================
+    // TOTAL EXPENSES
+    // ==================================
 
     const total =
         expenses.reduce(
             (
                 sum,
                 expense
-            ) =>
-                sum +
-                expense.amount,
+            ) => {
+
+                return (
+                    sum +
+                    Number(
+                        expense.amount || 0
+                    )
+                );
+
+            },
             0
         );
 
 
+    // ==================================
     // TODAY
+    // ==================================
 
     const today =
         new Date()
@@ -562,20 +980,34 @@ function updateExpenseStatistics() {
                 (
                     sum,
                     expense
-                ) =>
-                    sum +
-                    expense.amount,
+                ) => {
+
+                    return (
+                        sum +
+                        Number(
+                            expense.amount || 0
+                        )
+                    );
+
+                },
                 0
             );
 
 
+    // ==================================
     // AVERAGE
+    // ==================================
 
     const average =
         expenses.length > 0
-            ? total / expenses.length
+            ? total /
+              expenses.length
             : 0;
 
+
+    // ==================================
+    // DISPLAY
+    // ==================================
 
     document.getElementById(
         "totalExpenses"
@@ -608,20 +1040,33 @@ function updateExpenseStatistics() {
 // ==========================================
 
 const menuToggle =
-    document.getElementById("menuToggle");
+    document.getElementById(
+        "menuToggle"
+    );
 
 const sidebar =
-    document.getElementById("sidebar");
+    document.getElementById(
+        "sidebar"
+    );
 
 
-menuToggle.addEventListener(
-    "click",
-    function () {
+if (
+    menuToggle &&
+    sidebar
+) {
 
-        sidebar.classList.toggle("open");
+    menuToggle.addEventListener(
+        "click",
+        function () {
 
-    }
-);
+            sidebar.classList.toggle(
+                "open"
+            );
+
+        }
+    );
+
+}
 
 
 // ==========================================
@@ -629,38 +1074,46 @@ menuToggle.addEventListener(
 // ==========================================
 
 const logoutBtn =
-    document.getElementById("logoutBtn");
+    document.getElementById(
+        "logoutBtn"
+    );
 
 
-logoutBtn.addEventListener(
-    "click",
-    function () {
+if (logoutBtn) {
 
-        if (
-            confirm(
-                "Are you sure you want to logout?"
-            )
-        ) {
+    logoutBtn.addEventListener(
+        "click",
+        function () {
 
-            localStorage.removeItem(
-                "adminLoggedIn"
-            );
+            if (
+                confirm(
+                    "Are you sure you want to logout?"
+                )
+            ) {
 
-            localStorage.removeItem(
-                "adminEmail"
-            );
+                localStorage.removeItem(
+                    "adminLoggedIn"
+                );
 
-            window.location.href =
-                "login.html";
+
+                localStorage.removeItem(
+                    "adminEmail"
+                );
+
+
+                window.location.href =
+                    "login.html";
+
+            }
 
         }
+    );
 
-    }
-);
+}
 
 
 // ==========================================
 // INITIAL LOAD
 // ==========================================
 
-renderExpenses();
+loadExpenses();

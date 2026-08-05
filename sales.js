@@ -1,6 +1,27 @@
 // ==========================================
-// SALES MANAGEMENT SYSTEM
+// BIZMANAGER SALES MANAGEMENT
+// FIREBASE FIRESTORE VERSION
 // ==========================================
+
+// ==========================================
+// FIREBASE IMPORTS
+// ==========================================
+
+import {
+    collection,
+    getDocs,
+    addDoc,
+    deleteDoc,
+    doc,
+    updateDoc,
+    runTransaction,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import {
+    db
+} from "./firebase-config.js";
 
 
 // ==========================================
@@ -12,32 +33,18 @@ const loggedIn =
 
 if (loggedIn !== "true") {
 
-    window.location.href =
-        "login.html";
+    window.location.href = "login.html";
 
 }
 
 
 // ==========================================
-// DATABASES
+// DATABASE ARRAYS
 // ==========================================
 
-let customers =
-    JSON.parse(
-        localStorage.getItem("customers")
-    ) || [];
-
-
-let products =
-    JSON.parse(
-        localStorage.getItem("products")
-    ) || [];
-
-
-let sales =
-    JSON.parse(
-        localStorage.getItem("sales")
-    ) || [];
+let customers = [];
+let products = [];
+let sales = [];
 
 
 // ==========================================
@@ -45,85 +52,156 @@ let sales =
 // ==========================================
 
 const saleModal =
-    document.getElementById(
-        "saleModal"
-    );
+    document.getElementById("saleModal");
 
 const openSaleModal =
-    document.getElementById(
-        "openSaleModal"
-    );
+    document.getElementById("openSaleModal");
 
 const closeSaleModal =
-    document.getElementById(
-        "closeSaleModal"
-    );
+    document.getElementById("closeSaleModal");
 
 const cancelSale =
-    document.getElementById(
-        "cancelSale"
-    );
+    document.getElementById("cancelSale");
 
 const saleForm =
-    document.getElementById(
-        "saleForm"
-    );
+    document.getElementById("saleForm");
 
 const saleCustomer =
-    document.getElementById(
-        "saleCustomer"
-    );
+    document.getElementById("saleCustomer");
 
 const saleProduct =
-    document.getElementById(
-        "saleProduct"
-    );
+    document.getElementById("saleProduct");
 
 const salePrice =
-    document.getElementById(
-        "salePrice"
-    );
+    document.getElementById("salePrice");
 
 const availableStock =
-    document.getElementById(
-        "availableStock"
-    );
+    document.getElementById("availableStock");
 
 const saleQuantity =
-    document.getElementById(
-        "saleQuantity"
-    );
+    document.getElementById("saleQuantity");
 
 const saleTotal =
-    document.getElementById(
-        "saleTotal"
-    );
+    document.getElementById("saleTotal");
 
 const salesTableBody =
-    document.getElementById(
-        "salesTableBody"
-    );
+    document.getElementById("salesTableBody");
 
 const emptySales =
-    document.getElementById(
-        "emptySales"
-    );
+    document.getElementById("emptySales");
 
 const saleSearch =
-    document.getElementById(
-        "saleSearch"
-    );
+    document.getElementById("saleSearch");
 
 
 // ==========================================
-// OPEN MODAL
+// LOAD ALL FIREBASE DATA
+// ==========================================
+
+async function loadDatabase() {
+
+    try {
+
+        // ----------------------------------
+        // LOAD CUSTOMERS
+        // ----------------------------------
+
+        const customersSnapshot =
+            await getDocs(
+                collection(db, "customers")
+            );
+
+        customers =
+            customersSnapshot.docs.map(
+                document => ({
+
+                    id: document.id,
+
+                    ...document.data()
+
+                })
+            );
+
+
+        // ----------------------------------
+        // LOAD PRODUCTS
+        // ----------------------------------
+
+        const productsSnapshot =
+            await getDocs(
+                collection(db, "products")
+            );
+
+        products =
+            productsSnapshot.docs.map(
+                document => ({
+
+                    id: document.id,
+
+                    ...document.data()
+
+                })
+            );
+
+
+        // ----------------------------------
+        // LOAD SALES
+        // ----------------------------------
+
+        const salesQuery =
+            query(
+                collection(db, "sales"),
+                orderBy("date", "desc")
+            );
+
+
+        const salesSnapshot =
+            await getDocs(
+                salesQuery
+            );
+
+
+        sales =
+            salesSnapshot.docs.map(
+                document => ({
+
+                    id: document.id,
+
+                    ...document.data()
+
+                })
+            );
+
+
+        renderSales();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Firebase loading error:",
+            error
+        );
+
+
+        alert(
+            "Could not load sales data.\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// OPEN SALE MODAL
 // ==========================================
 
 openSaleModal.addEventListener(
     "click",
-    function () {
-
-        refreshDatabase();
+    async function () {
 
         saleForm.reset();
 
@@ -136,9 +214,11 @@ openSaleModal.addEventListener(
         saleTotal.textContent =
             "GH₵0.00";
 
-        loadCustomers();
 
-        loadProducts();
+        await loadCustomers();
+
+        await loadProducts();
+
 
         saleModal.classList.add(
             "show"
@@ -149,7 +229,7 @@ openSaleModal.addEventListener(
 
 
 // ==========================================
-// CLOSE MODAL
+// CLOSE SALE MODAL
 // ==========================================
 
 function closeSale() {
@@ -190,62 +270,80 @@ saleModal.addEventListener(
 
 
 // ==========================================
-// REFRESH DATABASE
-// ==========================================
-
-function refreshDatabase() {
-
-    customers =
-        JSON.parse(
-            localStorage.getItem("customers")
-        ) || [];
-
-    products =
-        JSON.parse(
-            localStorage.getItem("products")
-        ) || [];
-
-    sales =
-        JSON.parse(
-            localStorage.getItem("sales")
-        ) || [];
-
-}
-
-
-// ==========================================
 // LOAD CUSTOMERS
 // ==========================================
 
-function loadCustomers() {
+async function loadCustomers() {
 
-    saleCustomer.innerHTML = `
-        <option value="">
-            Select Customer
-        </option>
-    `;
+    try {
 
-
-    customers.forEach(
-        customer => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                customer.id;
-
-            option.textContent =
-                customer.name;
-
-            saleCustomer.appendChild(
-                option
+        const snapshot =
+            await getDocs(
+                collection(db, "customers")
             );
 
-        }
-    );
+
+        customers =
+            snapshot.docs.map(
+                document => ({
+
+                    id: document.id,
+
+                    ...document.data()
+
+                })
+            );
+
+
+        saleCustomer.innerHTML = `
+
+            <option value="">
+                Select Customer
+            </option>
+
+        `;
+
+
+        customers.forEach(
+            customer => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    customer.id;
+
+
+                option.textContent =
+                    customer.name ||
+                    "Unnamed Customer";
+
+
+                saleCustomer.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Could not load customers:",
+            error
+        );
+
+        alert(
+            "Customers could not be loaded.\n\n" +
+            error.message
+        );
+
+    }
 
 }
 
@@ -254,40 +352,83 @@ function loadCustomers() {
 // LOAD PRODUCTS
 // ==========================================
 
-function loadProducts() {
+async function loadProducts() {
 
-    saleProduct.innerHTML = `
-        <option value="">
-            Select Product
-        </option>
-    `;
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(db, "products")
+            );
 
 
-    products
-        .filter(
-            product =>
-                product.stock > 0
-        )
-        .forEach(
-            product => {
+        products =
+            snapshot.docs.map(
+                document => ({
 
-                const option =
-                    document.createElement(
-                        "option"
+                    id: document.id,
+
+                    ...document.data()
+
+                })
+            );
+
+
+        saleProduct.innerHTML = `
+
+            <option value="">
+                Select Product
+            </option>
+
+        `;
+
+
+        products
+            .filter(
+                product =>
+                    Number(product.stock) > 0
+            )
+            .forEach(
+                product => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+
+                    option.value =
+                        product.id;
+
+
+                    option.textContent =
+                        `${product.name || "Unnamed Product"} — GH₵${Number(
+                            product.price || 0
+                        ).toFixed(2)}`;
+
+
+                    saleProduct.appendChild(
+                        option
                     );
 
-                option.value =
-                    product.id;
+                }
+            );
 
-                option.textContent =
-                    `${product.name} — GH₵${product.price.toFixed(2)}`;
+    }
 
-                saleProduct.appendChild(
-                    option
-                );
+    catch (error) {
 
-            }
+        console.error(
+            "Could not load products:",
+            error
         );
+
+        alert(
+            "Products could not be loaded.\n\n" +
+            error.message
+        );
+
+    }
 
 }
 
@@ -314,22 +455,36 @@ saleProduct.addEventListener(
 
             availableStock.value = "";
 
-            calculateTotal();
+            saleTotal.textContent =
+                "GH₵0.00";
 
             return;
 
         }
 
 
+        const price =
+            Number(
+                product.price || 0
+            );
+
+
+        const stock =
+            Number(
+                product.stock || 0
+            );
+
+
         salePrice.value =
-            `GH₵${product.price.toFixed(2)}`;
+            `GH₵${price.toFixed(2)}`;
+
 
         availableStock.value =
-            product.stock;
+            stock;
 
 
         saleQuantity.max =
-            product.stock;
+            stock;
 
 
         calculateTotal();
@@ -372,6 +527,12 @@ function calculateTotal() {
     }
 
 
+    const price =
+        Number(
+            product.price || 0
+        );
+
+
     const quantity =
         Number(
             saleQuantity.value
@@ -379,8 +540,7 @@ function calculateTotal() {
 
 
     const total =
-        product.price *
-        quantity;
+        price * quantity;
 
 
     saleTotal.textContent =
@@ -395,31 +555,26 @@ function calculateTotal() {
 
 saleForm.addEventListener(
     "submit",
-    function (event) {
+    async function (event) {
 
         event.preventDefault();
 
 
-        refreshDatabase();
+        const customerId =
+            saleCustomer.value;
 
 
-        const customer =
-            customers.find(
-                customer =>
-                    customer.id ===
-                    saleCustomer.value
+        const productId =
+            saleProduct.value;
+
+
+        const quantity =
+            Number(
+                saleQuantity.value
             );
 
 
-        const productIndex =
-            products.findIndex(
-                product =>
-                    product.id ===
-                    saleProduct.value
-            );
-
-
-        if (!customer) {
+        if (!customerId) {
 
             alert(
                 "Please select a customer."
@@ -430,7 +585,7 @@ saleForm.addEventListener(
         }
 
 
-        if (productIndex === -1) {
+        if (!productId) {
 
             alert(
                 "Please select a product."
@@ -439,16 +594,6 @@ saleForm.addEventListener(
             return;
 
         }
-
-
-        const product =
-            products[productIndex];
-
-
-        const quantity =
-            Number(
-                saleQuantity.value
-            );
 
 
         if (
@@ -465,99 +610,239 @@ saleForm.addEventListener(
         }
 
 
-        if (
-            quantity >
-            product.stock
-        ) {
+        try {
+
+            // ==================================
+            // FIREBASE TRANSACTION
+            // ==================================
+
+            const saleId =
+                await runTransaction(
+                    db,
+                    async transaction => {
+
+                        // ----------------------------------
+                        // GET CUSTOMER
+                        // ----------------------------------
+
+                        const customerRef =
+                            doc(
+                                db,
+                                "customers",
+                                customerId
+                            );
+
+
+                        const customerSnapshot =
+                            await transaction.get(
+                                customerRef
+                            );
+
+
+                        if (
+                            !customerSnapshot.exists()
+                        ) {
+
+                            throw new Error(
+                                "Customer no longer exists."
+                            );
+
+                        }
+
+
+                        const customer =
+                            customerSnapshot.data();
+
+
+                        // ----------------------------------
+                        // GET PRODUCT
+                        // ----------------------------------
+
+                        const productRef =
+                            doc(
+                                db,
+                                "products",
+                                productId
+                            );
+
+
+                        const productSnapshot =
+                            await transaction.get(
+                                productRef
+                            );
+
+
+                        if (
+                            !productSnapshot.exists()
+                        ) {
+
+                            throw new Error(
+                                "Product no longer exists."
+                            );
+
+                        }
+
+
+                        const product =
+                            productSnapshot.data();
+
+
+                        const currentStock =
+                            Number(
+                                product.stock || 0
+                            );
+
+
+                        const price =
+                            Number(
+                                product.price || 0
+                            );
+
+
+                        // ----------------------------------
+                        // CHECK STOCK
+                        // ----------------------------------
+
+                        if (
+                            currentStock <= 0
+                        ) {
+
+                            throw new Error(
+                                "This product is out of stock."
+                            );
+
+                        }
+
+
+                        if (
+                            quantity >
+                            currentStock
+                        ) {
+
+                            throw new Error(
+                                `Only ${currentStock} units of ${product.name} are available.`
+                            );
+
+                        }
+
+
+                        // ----------------------------------
+                        // CALCULATE TOTAL
+                        // ----------------------------------
+
+                        const total =
+                            price *
+                            quantity;
+
+
+                        // ----------------------------------
+                        // CREATE SALE
+                        // ----------------------------------
+
+                        const saleRef =
+                            doc(
+                                collection(
+                                    db,
+                                    "sales"
+                                )
+                            );
+
+
+                        const saleData = {
+
+                            orderId:
+                                "ORD-" +
+                                Date.now(),
+
+                            customerId:
+                                customerId,
+
+                            customerName:
+                                customer.name ||
+                                "Unknown Customer",
+
+                            productId:
+                                productId,
+
+                            productName:
+                                product.name ||
+                                "Unnamed Product",
+
+                            quantity:
+                                quantity,
+
+                            price:
+                                price,
+
+                            total:
+                                total,
+
+                            date:
+                                new Date().toISOString()
+
+                        };
+
+
+                        transaction.set(
+                            saleRef,
+                            saleData
+                        );
+
+
+                        // ----------------------------------
+                        // REDUCE STOCK
+                        // ----------------------------------
+
+                        transaction.update(
+                            productRef,
+                            {
+
+                                stock:
+                                    currentStock -
+                                    quantity
+
+                            }
+                        );
+
+
+                        return saleRef.id;
+
+                    }
+                );
+
 
             alert(
-                `Only ${product.stock} units of ${product.name} are available.`
+                "Sale completed successfully!"
             );
 
-            return;
+
+            closeSale();
+
+
+            await loadDatabase();
+
+
+            // Reload products for future sales
+
+            await loadProducts();
+
 
         }
 
+        catch (error) {
 
-        const total =
-            product.price *
-            quantity;
-
-
-        // ==================================
-        // CREATE SALE
-        // ==================================
-
-        const newSale = {
-
-            id:
-                "ORD-" +
-                Date.now(),
-
-            customerId:
-                customer.id,
-
-            customerName:
-                customer.name,
-
-            productId:
-                product.id,
-
-            productName:
-                product.name,
-
-            quantity:
-                quantity,
-
-            price:
-                product.price,
-
-            total:
-                total,
-
-            date:
-                new Date().toISOString()
-
-        };
+            console.error(
+                "Sale error:",
+                error
+            );
 
 
-        sales.unshift(
-            newSale
-        );
+            alert(
+                "Sale could not be completed.\n\n" +
+                error.message
+            );
 
-
-        // ==================================
-        // REDUCE PRODUCT STOCK
-        // ==================================
-
-        products[productIndex].stock -=
-            quantity;
-
-
-        // ==================================
-        // SAVE DATABASE
-        // ==================================
-
-        localStorage.setItem(
-            "sales",
-            JSON.stringify(sales)
-        );
-
-
-        localStorage.setItem(
-            "products",
-            JSON.stringify(products)
-        );
-
-
-        alert(
-            `Sale completed successfully!\n\nOrder: ${newSale.id}\nTotal: GH₵${total.toFixed(2)}`
-        );
-
-
-        closeSale();
-
-        renderSales();
+        }
 
     }
 );
@@ -575,28 +860,61 @@ function renderSales(
 
 
     const search =
-        searchTerm.toLowerCase();
+        searchTerm
+            .toLowerCase()
+            .trim();
 
 
     const filteredSales =
         sales.filter(
-            sale =>
+            sale => {
 
-                sale.id
-                    .toLowerCase()
-                    .includes(search)
+                const orderId =
+                    (
+                        sale.orderId ||
+                        sale.id ||
+                        ""
+                    )
+                    .toLowerCase();
 
-                ||
 
-                sale.customerName
-                    .toLowerCase()
-                    .includes(search)
+                const customerName =
+                    (
+                        sale.customerName ||
+                        ""
+                    )
+                    .toLowerCase();
 
-                ||
 
-                sale.productName
-                    .toLowerCase()
-                    .includes(search)
+                const productName =
+                    (
+                        sale.productName ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                return (
+
+                    orderId.includes(
+                        search
+                    )
+
+                    ||
+
+                    customerName.includes(
+                        search
+                    )
+
+                    ||
+
+                    productName.includes(
+                        search
+                    )
+
+                );
+
+            }
         );
 
 
@@ -627,8 +945,22 @@ function renderSales(
 
 
             const date =
-                new Date(
-                    sale.date
+                sale.date
+                    ? new Date(
+                        sale.date
+                    )
+                    : null;
+
+
+            const total =
+                Number(
+                    sale.total || 0
+                );
+
+
+            const price =
+                Number(
+                    sale.price || 0
                 );
 
 
@@ -638,7 +970,7 @@ function renderSales(
 
                     <span class="sale-order-id">
 
-                        ${sale.id}
+                        ${sale.orderId || sale.id}
 
                     </span>
 
@@ -647,21 +979,21 @@ function renderSales(
 
                 <td>
 
-                    ${sale.customerName}
+                    ${sale.customerName || "-"}
 
                 </td>
 
 
                 <td>
 
-                    ${sale.productName}
+                    ${sale.productName || "-"}
 
                 </td>
 
 
                 <td>
 
-                    ${sale.quantity}
+                    ${sale.quantity || 0}
 
                 </td>
 
@@ -670,7 +1002,7 @@ function renderSales(
 
                     <strong>
 
-                        GH₵${sale.total.toFixed(2)}
+                        GH₵${total.toFixed(2)}
 
                     </strong>
 
@@ -681,7 +1013,11 @@ function renderSales(
 
                     <span class="sale-date">
 
-                        ${date.toLocaleDateString()}
+                        ${
+                            date
+                                ? date.toLocaleDateString()
+                                : "-"
+                        }
 
                     </span>
 
@@ -694,7 +1030,8 @@ function renderSales(
 
                         <button
                             class="customer-action-btn edit-btn"
-                            onclick="viewSale('${sale.id}')">
+                            data-action="view"
+                            data-id="${sale.id}">
 
                             <i class="fa-solid fa-eye"></i>
 
@@ -703,7 +1040,8 @@ function renderSales(
 
                         <button
                             class="customer-action-btn delete-btn"
-                            onclick="deleteSale('${sale.id}')">
+                            data-action="delete"
+                            data-id="${sale.id}">
 
                             <i class="fa-solid fa-trash"></i>
 
@@ -714,6 +1052,46 @@ function renderSales(
                 </td>
 
             `;
+
+
+            // ----------------------------------
+            // VIEW BUTTON
+            // ----------------------------------
+
+            row
+                .querySelector(
+                    '[data-action="view"]'
+                )
+                .addEventListener(
+                    "click",
+                    function () {
+
+                        viewSale(
+                            sale.id
+                        );
+
+                    }
+                );
+
+
+            // ----------------------------------
+            // DELETE BUTTON
+            // ----------------------------------
+
+            row
+                .querySelector(
+                    '[data-action="delete"]'
+                )
+                .addEventListener(
+                    "click",
+                    function () {
+
+                        deleteSale(
+                            sale.id
+                        );
+
+                    }
+                );
 
 
             salesTableBody.appendChild(
@@ -742,12 +1120,34 @@ function viewSale(id) {
         );
 
 
-    if (!sale) return;
+    if (!sale) {
+
+        alert(
+            "Sale could not be found."
+        );
+
+        return;
+
+    }
 
 
     const date =
-        new Date(
-            sale.date
+        sale.date
+            ? new Date(
+                sale.date
+            )
+            : null;
+
+
+    const price =
+        Number(
+            sale.price || 0
+        );
+
+
+    const total =
+        Number(
+            sale.total || 0
         );
 
 
@@ -755,19 +1155,39 @@ function viewSale(id) {
 
         `ORDER DETAILS\n\n` +
 
-        `Order ID: ${sale.id}\n` +
+        `Order ID: ${
+            sale.orderId ||
+            sale.id
+        }\n` +
 
-        `Customer: ${sale.customerName}\n` +
+        `Customer: ${
+            sale.customerName ||
+            "-"
+        }\n` +
 
-        `Product: ${sale.productName}\n` +
+        `Product: ${
+            sale.productName ||
+            "-"
+        }\n` +
 
-        `Quantity: ${sale.quantity}\n` +
+        `Quantity: ${
+            sale.quantity ||
+            0
+        }\n` +
 
-        `Unit Price: GH₵${sale.price.toFixed(2)}\n` +
+        `Unit Price: GH₵${
+            price.toFixed(2)
+        }\n` +
 
-        `Total: GH₵${sale.total.toFixed(2)}\n` +
+        `Total: GH₵${
+            total.toFixed(2)
+        }\n` +
 
-        `Date: ${date.toLocaleString()}`
+        `Date: ${
+            date
+                ? date.toLocaleString()
+                : "-"
+        }`
 
     );
 
@@ -776,9 +1196,10 @@ function viewSale(id) {
 
 // ==========================================
 // DELETE SALE
+// RETURN STOCK TO FIREBASE
 // ==========================================
 
-function deleteSale(id) {
+async function deleteSale(id) {
 
     const sale =
         sales.find(
@@ -787,64 +1208,134 @@ function deleteSale(id) {
         );
 
 
-    if (!sale) return;
+    if (!sale) {
+
+        alert(
+            "Sale could not be found."
+        );
+
+        return;
+
+    }
 
 
     const confirmed =
         confirm(
-            `Delete order ${sale.id}?\n\nThe sold quantity will be returned to inventory.`
+            `Delete order ${
+                sale.orderId ||
+                sale.id
+            }?\n\nThe sold quantity will be returned to inventory.`
         );
 
 
     if (!confirmed) return;
 
 
-    // Find product
+    try {
 
-    const productIndex =
-        products.findIndex(
-            product =>
-                product.id ===
-                sale.productId
+        await runTransaction(
+            db,
+            async transaction => {
+
+                // ----------------------------------
+                // SALE REFERENCE
+                // ----------------------------------
+
+                const saleRef =
+                    doc(
+                        db,
+                        "sales",
+                        id
+                    );
+
+
+                // ----------------------------------
+                // PRODUCT REFERENCE
+                // ----------------------------------
+
+                const productRef =
+                    doc(
+                        db,
+                        "products",
+                        sale.productId
+                    );
+
+
+                const productSnapshot =
+                    await transaction.get(
+                        productRef
+                    );
+
+
+                if (
+                    productSnapshot.exists()
+                ) {
+
+                    const product =
+                        productSnapshot.data();
+
+
+                    const currentStock =
+                        Number(
+                            product.stock || 0
+                        );
+
+
+                    const returnedStock =
+                        Number(
+                            sale.quantity || 0
+                        );
+
+
+                    transaction.update(
+                        productRef,
+                        {
+
+                            stock:
+                                currentStock +
+                                returnedStock
+
+                        }
+                    );
+
+                }
+
+
+                // ----------------------------------
+                // DELETE SALE
+                // ----------------------------------
+
+                transaction.delete(
+                    saleRef
+                );
+
+            }
         );
 
 
-    // Return stock
+        alert(
+            "Sale deleted and stock returned successfully."
+        );
 
-    if (
-        productIndex !== -1
-    ) {
 
-        products[productIndex].stock +=
-            sale.quantity;
+        await loadDatabase();
 
     }
 
+    catch (error) {
 
-    // Remove sale
-
-    sales =
-        sales.filter(
-            sale =>
-                sale.id !== id
+        console.error(
+            "Delete sale error:",
+            error
         );
 
 
-    // Save
+        alert(
+            "Sale could not be deleted.\n\n" +
+            error.message
+        );
 
-    localStorage.setItem(
-        "sales",
-        JSON.stringify(sales)
-    );
-
-
-    localStorage.setItem(
-        "products",
-        JSON.stringify(products)
-    );
-
-
-    renderSales();
+    }
 
 }
 
@@ -880,16 +1371,24 @@ function updateSalesStatistics() {
             (
                 total,
                 sale
-            ) =>
-                total +
-                sale.total,
+            ) => {
+
+                return (
+                    total +
+                    Number(
+                        sale.total || 0
+                    )
+                );
+
+            },
             0
         );
 
 
     const average =
         totalOrders > 0
-            ? revenue / totalOrders
+            ? revenue /
+              totalOrders
             : 0;
 
 
@@ -902,6 +1401,10 @@ function updateSalesStatistics() {
             .filter(
                 sale => {
 
+                    if (!sale.date)
+                        return false;
+
+
                     const date =
                         new Date(
                             sale.date
@@ -911,17 +1414,20 @@ function updateSalesStatistics() {
                     return (
 
                         date.getDate()
-                            === today.getDate()
+                            ===
+                        today.getDate()
 
                         &&
 
                         date.getMonth()
-                            === today.getMonth()
+                            ===
+                        today.getMonth()
 
                         &&
 
                         date.getFullYear()
-                            === today.getFullYear()
+                            ===
+                        today.getFullYear()
 
                     );
 
@@ -931,9 +1437,16 @@ function updateSalesStatistics() {
                 (
                     total,
                     sale
-                ) =>
-                    total +
-                    sale.total,
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            sale.total || 0
+                        )
+                    );
+
+                },
                 0
             );
 
@@ -1015,9 +1528,11 @@ logoutBtn.addEventListener(
                 "adminLoggedIn"
             );
 
+
             localStorage.removeItem(
                 "adminEmail"
             );
+
 
             window.location.href =
                 "login.html";
@@ -1032,4 +1547,4 @@ logoutBtn.addEventListener(
 // INITIAL LOAD
 // ==========================================
 
-renderSales();
+loadDatabase();

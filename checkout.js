@@ -1,6 +1,17 @@
 // ==========================================
 // BIZMANAGER CHECKOUT
+// FIREBASE VERSION
 // ==========================================
+
+import {
+    db
+} from "./firebase-config.js";
+
+import {
+    collection,
+    doc,
+    runTransaction
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 
 // ==========================================
@@ -48,6 +59,23 @@ const summaryCount =
 const checkoutForm =
     document.getElementById("checkoutForm");
 
+const successModal =
+    document.getElementById("orderSuccess");
+
+const orderNumber =
+    document.getElementById("orderNumber");
+
+
+// ==========================================
+// FORMAT MONEY
+// ==========================================
+
+function formatMoney(amount) {
+
+    return `GH₵${Number(amount || 0).toFixed(2)}`;
+
+}
+
 
 // ==========================================
 // CHECK CART
@@ -59,8 +87,7 @@ if (cart.length === 0) {
         "Your cart is empty. Please add a product first."
     );
 
-    window.location.href =
-        "shop.html";
+    window.location.href = "shop.html";
 
 }
 
@@ -73,9 +100,7 @@ function displayCheckout() {
 
     if (!checkoutItems) return;
 
-
     checkoutItems.innerHTML = "";
-
 
     let total = 0;
 
@@ -90,7 +115,6 @@ function displayCheckout() {
         const itemQuantity =
             Number(item.quantity) || 0;
 
-
         const itemTotal =
             price * itemQuantity;
 
@@ -103,7 +127,6 @@ function displayCheckout() {
         const element =
             document.createElement("div");
 
-
         element.className =
             "checkout-item";
 
@@ -113,8 +136,10 @@ function displayCheckout() {
 
                 ? `
                     <img
-                        src="${item.image}"
-                        alt="${item.name || "Product"}">
+                        src="${escapeHTML(item.image)}"
+                        alt="${escapeHTML(
+                            item.name || "Product"
+                        )}">
                   `
 
                 : `
@@ -134,7 +159,9 @@ function displayCheckout() {
             <div class="checkout-item-info">
 
                 <h4>
-                    ${item.name || "Unnamed Product"}
+                    ${escapeHTML(
+                        item.name || "Unnamed Product"
+                    )}
                 </h4>
 
                 <span>
@@ -142,7 +169,7 @@ function displayCheckout() {
                 </span>
 
                 <strong>
-                    GH₵${itemTotal.toFixed(2)}
+                    ${formatMoney(itemTotal)}
                 </strong>
 
             </div>
@@ -157,20 +184,32 @@ function displayCheckout() {
     });
 
 
-    checkoutSubtotal.textContent =
-        `GH₵${total.toFixed(2)}`;
+    if (checkoutSubtotal) {
+
+        checkoutSubtotal.textContent =
+            formatMoney(total);
+
+    }
 
 
-    checkoutTotal.textContent =
-        `GH₵${total.toFixed(2)}`;
+    if (checkoutTotal) {
+
+        checkoutTotal.textContent =
+            formatMoney(total);
+
+    }
 
 
-    summaryCount.textContent =
-        `${quantity} item${
-            quantity === 1
-                ? ""
-                : "s"
-        }`;
+    if (summaryCount) {
+
+        summaryCount.textContent =
+            `${quantity} item${
+                quantity === 1
+                    ? ""
+                    : "s"
+            }`;
+
+    }
 
 }
 
@@ -184,10 +223,17 @@ function generateOrderNumber() {
     const timestamp =
         Date.now()
             .toString()
-            .slice(-6);
+            .slice(-8);
 
 
-    return `ORD-${timestamp}`;
+    const random =
+        Math.floor(
+            100 +
+            Math.random() * 900
+        );
+
+
+    return `ORD-${timestamp}-${random}`;
 
 }
 
@@ -261,14 +307,7 @@ function getCustomerInformation() {
 
 
 // ==========================================
-// CREATE SMALL ORDER ITEMS
-// ==========================================
-//
-// IMPORTANT:
-// We DO NOT save the Base64 image inside
-// the order. This prevents localStorage
-// from becoming too large.
-//
+// CREATE ORDER ITEMS
 // ==========================================
 
 function createOrderItems() {
@@ -307,7 +346,7 @@ if (checkoutForm) {
 
     checkoutForm.addEventListener(
         "submit",
-        function(event) {
+        async function(event) {
 
             event.preventDefault();
 
@@ -385,165 +424,346 @@ if (checkoutForm) {
 
 
             // ==================================
-            // CREATE ORDER
+            // PAYMENT
             // ==================================
 
-            const order = {
-
-                id:
-                    generateOrderNumber(),
-
-                date:
-                    new Date().toISOString(),
-
-                customer:
-                    customer,
-
-                // IMPORTANT:
-                // No images are saved here.
-                items:
-                    createOrderItems(),
-
-                total:
-                    total,
-
-                paymentMethod:
-                    getPaymentMethod(),
-
-                status:
-                    "Pending"
-
-            };
+            const paymentMethod =
+                getPaymentMethod();
 
 
             // ==================================
-            // LOAD ORDERS
+            // ORDER NUMBER
             // ==================================
 
-            let orders = [];
+            const generatedOrderNumber =
+                generateOrderNumber();
+
+
+            // ==================================
+            // DISABLE BUTTON
+            // ==================================
+
+            const placeOrderButton =
+                checkoutForm.querySelector(
+                    'button[type="submit"]'
+                );
+
+
+            if (placeOrderButton) {
+
+                placeOrderButton.disabled =
+                    true;
+
+                placeOrderButton.innerHTML = `
+
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+
+                    Processing Order...
+
+                `;
+
+            }
 
 
             try {
 
-                orders =
-                    JSON.parse(
-                        localStorage.getItem(
+                // ==================================
+                // FIREBASE TRANSACTION
+                // ==================================
+                //
+                // This transaction:
+                //
+                // 1. Checks product stock
+                // 2. Reduces Firebase stock
+                // 3. Creates Firebase order
+                //
+                // Everything happens together.
+                //
+                // ==================================
+
+                const orderRef =
+                    doc(
+                        collection(
+                            db,
                             "orders"
                         )
-                    ) || [];
+                    );
+
+
+                await runTransaction(
+                    db,
+                    async function(transaction) {
+
+                        const productRefs = [];
+
+
+                        // ==================================
+                        // READ ALL PRODUCTS FIRST
+                        // ==================================
+
+                        for (
+                            const cartItem of cart
+                        ) {
+
+                            const productId =
+                                cartItem.id ||
+                                cartItem.productId;
+
+
+                            if (!productId) {
+
+                                throw new Error(
+                                    `Product "${cartItem.name}" does not have a valid Firebase ID.`
+                                );
+
+                            }
+
+
+                            const productRef =
+                                doc(
+                                    db,
+                                    "products",
+                                    String(
+                                        productId
+                                    )
+                                );
+
+
+                            const productSnapshot =
+                                await transaction.get(
+                                    productRef
+                                );
+
+
+                            if (
+                                !productSnapshot.exists()
+                            ) {
+
+                                throw new Error(
+                                    `Product "${cartItem.name}" no longer exists.`
+                                );
+
+                            }
+
+
+                            const productData =
+                                productSnapshot.data();
+
+
+                            const currentStock =
+                                Number(
+                                    productData.stock ??
+                                    productData.quantity ??
+                                    0
+                                );
+
+
+                            const requestedQuantity =
+                                Number(
+                                    cartItem.quantity
+                                ) || 0;
+
+
+                            if (
+                                requestedQuantity <= 0
+                            ) {
+
+                                throw new Error(
+                                    `Invalid quantity for ${cartItem.name}.`
+                                );
+
+                            }
+
+
+                            if (
+                                currentStock <
+                                requestedQuantity
+                            ) {
+
+                                throw new Error(
+                                    `Not enough stock for "${cartItem.name}". Available: ${currentStock}.`
+                                );
+
+                            }
+
+
+                            productRefs.push({
+
+                                ref:
+                                    productRef,
+
+                                data:
+                                    productData,
+
+                                stock:
+                                    currentStock,
+
+                                quantity:
+                                    requestedQuantity
+
+                            });
+
+                        }
+
+
+                        // ==================================
+                        // UPDATE PRODUCT STOCK
+                        // ==================================
+
+                        productRefs.forEach(
+                            function(product) {
+
+                                const newStock =
+                                    Math.max(
+                                        0,
+                                        product.stock -
+                                        product.quantity
+                                    );
+
+
+                                transaction.update(
+                                    product.ref,
+                                    {
+
+                                        stock:
+                                            newStock
+
+                                    }
+                                );
+
+                            }
+                        );
+
+
+                        // ==================================
+                        // CREATE FIREBASE ORDER
+                        // ==================================
+
+                        const order = {
+
+                            id:
+                                generatedOrderNumber,
+
+                            customer:
+                                customer,
+
+                            items:
+                                createOrderItems(),
+
+                            total:
+                                Number(
+                                    total.toFixed(2)
+                                ),
+
+                            paymentMethod:
+                                paymentMethod,
+
+                            status:
+                                "Pending",
+
+                            date:
+                                new Date().toISOString(),
+
+                            createdAt:
+                                new Date().toISOString()
+
+                        };
+
+
+                        transaction.set(
+                            orderRef,
+                            order
+                        );
+
+                    }
+                );
+
+
+                // ==================================
+                // CLEAR CART
+                // ==================================
+
+                localStorage.removeItem(
+                    "shoppingCart"
+                );
+
+                cart = [];
+
+
+                // ==================================
+                // SHOW ORDER NUMBER
+                // ==================================
+
+                if (orderNumber) {
+
+                    orderNumber.textContent =
+                        generatedOrderNumber;
+
+                }
+
+
+                // ==================================
+                // SHOW SUCCESS MODAL
+                // ==================================
+
+                if (successModal) {
+
+                    successModal.classList.add(
+                        "show"
+                    );
+
+                }
+                else {
+
+                    alert(
+                        `Order ${generatedOrderNumber} placed successfully!`
+                    );
+
+                    window.location.href =
+                        "shop.html";
+
+                }
+
+
+                console.log(
+                    "Order successfully created in Firebase:",
+                    generatedOrderNumber
+                );
+
 
             }
             catch (error) {
 
                 console.error(
-                    "Could not read existing orders:",
-                    error
-                );
-
-                orders = [];
-
-            }
-
-
-            // ==================================
-            // SAVE ORDER
-            // ==========================================
-
-            try {
-
-                orders.push(
-                    order
-                );
-
-
-                localStorage.setItem(
-                    "orders",
-                    JSON.stringify(
-                        orders
-                    )
-                );
-
-            }
-            catch (error) {
-
-                console.error(
-                    "ORDER SAVE ERROR:",
+                    "ORDER ERROR:",
                     error
                 );
 
 
                 alert(
-                    "The order could not be saved. Your product images may have filled the browser storage."
+                    "The order could not be placed.\n\n" +
+                    error.message
                 );
 
 
-                return;
+                // ==================================
+                // ENABLE BUTTON AGAIN
+                // ==================================
 
-            }
+                if (placeOrderButton) {
 
+                    placeOrderButton.disabled =
+                        false;
 
-            // ==================================
-            // UPDATE PRODUCT STOCK
-            // ==================================
+                    placeOrderButton.innerHTML = `
 
-            updateProductStock();
+                        <i class="fa-solid fa-lock"></i>
 
+                        Place Order
 
-            // ==================================
-            // CLEAR SHOPPING CART
-            // ==================================
+                    `;
 
-            localStorage.removeItem(
-                "shoppingCart"
-            );
-
-
-            cart = [];
-
-
-            // ==================================
-            // SHOW ORDER NUMBER
-            // ==================================
-
-            const orderNumber =
-                document.getElementById(
-                    "orderNumber"
-                );
-
-
-            if (orderNumber) {
-
-                orderNumber.textContent =
-                    order.id;
-
-            }
-
-
-            // ==================================
-            // SHOW SUCCESS MODAL
-            // ==================================
-
-            const successModal =
-                document.getElementById(
-                    "orderSuccess"
-                );
-
-
-            if (successModal) {
-
-                successModal.classList.add(
-                    "show"
-                );
-
-            }
-            else {
-
-                alert(
-                    `Order ${order.id} placed successfully!`
-                );
-
-                window.location.href =
-                    "shop.html";
+                }
 
             }
 
@@ -554,143 +774,34 @@ if (checkoutForm) {
 
 
 // ==========================================
-// UPDATE PRODUCT STOCK
+// ESCAPE HTML
 // ==========================================
 
-function updateProductStock() {
+function escapeHTML(value) {
 
-    let products = [];
-
-
-    try {
-
-        products =
-            JSON.parse(
-                localStorage.getItem(
-                    "products"
-                )
-            ) || [];
-
-    }
-    catch (error) {
-
-        console.error(
-            "Could not load products:",
-            error
-        );
-
-        return;
-
-    }
-
-
-    cart.forEach(function(cartItem) {
-
-        const cartId =
-            String(
-                cartItem.id ||
-                cartItem.productId ||
-                cartItem.name ||
-                ""
-            );
-
-
-        const product =
-            products.find(function(product) {
-
-                const productId =
-                    String(
-                        product.id ||
-                        product.productId ||
-                        product.name ||
-                        product.productName ||
-                        ""
-                    );
-
-
-                return (
-                    productId === cartId
-                );
-
-            });
-
-
-        if (!product) {
-
-            console.warn(
-                "Product not found:",
-                cartItem
-            );
-
-            return;
-
-        }
-
-
-        // ==================================
-        // CURRENT STOCK
-        // ==================================
-
-        const currentStock =
-            Number(
-                product.stock ??
-                product.quantity ??
-                0
-            );
-
-
-        // ==================================
-        // QUANTITY SOLD
-        // ==================================
-
-        const quantitySold =
-            Number(
-                cartItem.quantity
-            ) || 0;
-
-
-        // ==================================
-        // NEW STOCK
-        // ==================================
-
-        const newStock =
-            Math.max(
-                0,
-                currentStock -
-                quantitySold
-            );
-
-
-        // Your products.js uses "stock"
-
-        product.stock =
-            newStock;
-
-    });
-
-
-    // ==================================
-    // SAVE UPDATED PRODUCTS
-    // ==================================
-
-    try {
-
-        localStorage.setItem(
-            "products",
-            JSON.stringify(
-                products
-            )
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "Could not update product stock:",
-            error
-        );
-
-    }
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
 
 }
 
@@ -707,10 +818,10 @@ displayCheckout();
 // ==========================================
 
 console.log(
-    "BizManager Checkout Loaded Successfully"
+    "BizManager Firebase Checkout Loaded"
 );
 
 console.log(
-    "Cart:",
+    "Shopping Cart:",
     cart
 );

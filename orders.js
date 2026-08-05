@@ -1,12 +1,43 @@
 // ==========================================
 // BIZMANAGER ADMIN ORDERS
+// FIREBASE FIRESTORE VERSION
 // ==========================================
 
 
-let orders =
-    JSON.parse(
-        localStorage.getItem("orders")
-    ) || [];
+// ==========================================
+// FIREBASE IMPORTS
+// ==========================================
+
+import {
+    collection,
+    getDocs,
+    doc,
+    updateDoc,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import {
+    db
+} from "./firebase-config.js";
+
+
+
+
+
+// ==========================================
+// FIREBASE COLLECTION
+// ==========================================
+
+const ordersCollection =
+    collection(db, "orders");
+
+
+// ==========================================
+// ORDERS DATA
+// ==========================================
+
+let orders = [];
 
 
 // ==========================================
@@ -33,12 +64,31 @@ const statusFilter =
         "orderStatusFilter"
     );
 
+const orderModal =
+    document.getElementById(
+        "orderModal"
+    );
+
+const closeOrderModal =
+    document.getElementById(
+        "closeOrderModal"
+    );
+
+const orderDetails =
+    document.getElementById(
+        "orderDetails"
+    );
+
 
 // ==========================================
 // FORMAT DATE
 // ==========================================
 
 function formatDate(date) {
+
+    if (!date) {
+        return "-";
+    }
 
     return new Date(date)
         .toLocaleDateString(
@@ -59,7 +109,7 @@ function formatDate(date) {
 
 function formatMoney(amount) {
 
-    return `GH₵${Number(amount)
+    return `GH₵${Number(amount || 0)
         .toFixed(2)}`;
 
 }
@@ -71,12 +121,162 @@ function formatMoney(amount) {
 
 function getStatusClass(status) {
 
-    return status
+    return String(status || "")
         .toLowerCase()
         .replace(
             /\s+/g,
             "-"
         );
+
+}
+
+
+// ==========================================
+// LOAD ORDERS FROM FIREBASE
+// ==========================================
+
+async function loadOrders() {
+
+    try {
+
+        tableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    style="text-align:center;"
+                >
+
+                    Loading orders...
+
+                </td>
+
+            </tr>
+
+        `;
+
+
+        // ==================================
+        // GET ORDERS
+        // ==================================
+
+        let snapshot;
+
+
+        try {
+
+            const ordersQuery =
+                query(
+                    ordersCollection,
+                    orderBy(
+                        "date",
+                        "desc"
+                    )
+                );
+
+
+            snapshot =
+                await getDocs(
+                    ordersQuery
+                );
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "Could not order by date. Loading orders normally.",
+                error
+            );
+
+
+            snapshot =
+                await getDocs(
+                    ordersCollection
+                );
+
+        }
+
+
+        orders =
+            snapshot.docs.map(
+                documentSnapshot => ({
+
+                    id:
+                        documentSnapshot.id,
+
+                    ...documentSnapshot.data()
+
+                })
+            );
+
+
+        // ==================================
+        // SORT NEWEST FIRST
+        // ==================================
+
+        orders.sort(
+            (a, b) => {
+
+                const dateA =
+                    new Date(
+                        a.date || 0
+                    );
+
+                const dateB =
+                    new Date(
+                        b.date || 0
+                    );
+
+                return dateB - dateA;
+
+            }
+        );
+
+
+        updateStats();
+
+        displayOrders();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error loading orders:",
+            error
+        );
+
+
+        tableBody.innerHTML = "";
+
+
+        emptyOrders.style.display =
+            "block";
+
+
+        emptyOrders.innerHTML = `
+
+            <i class="fa-solid fa-triangle-exclamation"></i>
+
+            <h3>
+                Orders could not be loaded
+            </h3>
+
+            <p>
+                ${error.message}
+            </p>
+
+        `;
+
+
+        alert(
+            "Orders could not be loaded.\n\n" +
+            error.message
+        );
+
+    }
 
 }
 
@@ -122,45 +322,90 @@ function updateStats() {
                 (
                     total,
                     order
-                ) =>
-                    total +
-                    Number(
-                        order.total
-                    ),
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            order.total || 0
+                        )
+                    );
+
+                },
                 0
             );
 
 
-    document.getElementById(
-        "totalOrders"
-    ).textContent =
-        orders.length;
-
-
-    document.getElementById(
-        "pendingOrders"
-    ).textContent =
-        pending;
-
-
-    document.getElementById(
-        "processingOrders"
-    ).textContent =
-        processing;
-
-
-    document.getElementById(
-        "completedOrders"
-    ).textContent =
-        completed;
-
-
-    document.getElementById(
-        "totalSales"
-    ).textContent =
-        formatMoney(
-            totalSales
+    const totalOrdersElement =
+        document.getElementById(
+            "totalOrders"
         );
+
+
+    const pendingOrdersElement =
+        document.getElementById(
+            "pendingOrders"
+        );
+
+
+    const processingOrdersElement =
+        document.getElementById(
+            "processingOrders"
+        );
+
+
+    const completedOrdersElement =
+        document.getElementById(
+            "completedOrders"
+        );
+
+
+    const totalSalesElement =
+        document.getElementById(
+            "totalSales"
+        );
+
+
+    if (totalOrdersElement) {
+
+        totalOrdersElement.textContent =
+            orders.length;
+
+    }
+
+
+    if (pendingOrdersElement) {
+
+        pendingOrdersElement.textContent =
+            pending;
+
+    }
+
+
+    if (processingOrdersElement) {
+
+        processingOrdersElement.textContent =
+            processing;
+
+    }
+
+
+    if (completedOrdersElement) {
+
+        completedOrdersElement.textContent =
+            completed;
+
+    }
+
+
+    if (totalSalesElement) {
+
+        totalSalesElement.textContent =
+            formatMoney(
+                totalSales
+            );
+
+    }
 
 }
 
@@ -172,53 +417,79 @@ function updateStats() {
 function displayOrders() {
 
     const search =
-        searchInput.value
-            .toLowerCase()
-            .trim();
+        searchInput
+            ? searchInput.value
+                .toLowerCase()
+                .trim()
+            : "";
 
 
     const status =
-        statusFilter.value;
+        statusFilter
+            ? statusFilter.value
+            : "all";
 
 
     const filtered =
         orders.filter(
             order => {
 
+                const customer =
+                    order.customer ||
+                    {};
+
+
                 const customerName =
-                    order.customer
-                        ?.name
-                        ?.toLowerCase() ||
-                    "";
+                    (
+                        customer.name ||
+                        order.customerName ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const customerPhone =
+                    (
+                        customer.phone ||
+                        ""
+                    )
+                    .toLowerCase();
 
 
                 const orderId =
-                    order.id
-                        ?.toLowerCase() ||
-                    "";
-
-
-                const phone =
-                    order.customer
-                        ?.phone
-                        ?.toLowerCase() ||
-                    "";
+                    (
+                        order.orderId ||
+                        order.id ||
+                        ""
+                    )
+                    .toLowerCase();
 
 
                 const matchesSearch =
+
                     orderId.includes(
                         search
-                    ) ||
+                    )
+
+                    ||
+
                     customerName.includes(
                         search
-                    ) ||
-                    phone.includes(
+                    )
+
+                    ||
+
+                    customerPhone.includes(
                         search
                     );
 
 
                 const matchesStatus =
-                    status === "all" ||
+
+                    status === "all"
+
+                    ||
+
                     order.status ===
                     status;
 
@@ -251,113 +522,166 @@ function displayOrders() {
         "none";
 
 
-    filtered
-        .slice()
-        .reverse()
-        .forEach(
-            order => {
+    filtered.forEach(
+        order => {
 
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                const customer =
-                    order.customer ||
-                    {};
-
-
-                row.innerHTML = `
-
-                    <td>
-
-                        <span class="order-id">
-
-                            ${order.id}
-
-                        </span>
-
-                    </td>
-
-
-                    <td>
-
-                        <span class="customer-name">
-
-                            ${customer.name || "Unknown"}
-
-                        </span>
-
-                        <span class="customer-phone">
-
-                            ${customer.phone || ""}
-
-                        </span>
-
-                    </td>
-
-
-                    <td>
-
-                        ${formatDate(order.date)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${order.paymentMethod || "Not specified"}
-
-                    </td>
-
-
-                    <td>
-
-                        <strong>
-
-                            ${formatMoney(order.total)}
-
-                        </strong>
-
-                    </td>
-
-
-                    <td>
-
-                        <span class="
-                            order-status
-                            status-${getStatusClass(order.status)}
-                        ">
-
-                            ${order.status}
-
-                        </span>
-
-                    </td>
-
-
-                    <td>
-
-                        <button
-                            class="view-order-btn"
-                            onclick="viewOrder('${order.id}')">
-
-                            <i class="fa-solid fa-eye"></i>
-
-                        </button>
-
-                    </td>
-
-                `;
-
-
-                tableBody.appendChild(
-                    row
+            const row =
+                document.createElement(
+                    "tr"
                 );
 
-            }
-        );
+
+            const customer =
+                order.customer ||
+                {};
+
+
+            const customerName =
+                customer.name ||
+                order.customerName ||
+                "Unknown";
+
+
+            const customerPhone =
+                customer.phone ||
+                "";
+
+
+            const orderNumber =
+                order.orderId ||
+                order.id;
+
+
+            const paymentMethod =
+                order.paymentMethod ||
+                "Not specified";
+
+
+            const status =
+                order.status ||
+                "Pending";
+
+
+            row.innerHTML = `
+
+                <td>
+
+                    <span class="order-id">
+
+                        ${orderNumber}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="customer-name">
+
+                        ${customerName}
+
+                    </span>
+
+                    <span class="customer-phone">
+
+                        ${customerPhone}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    ${formatDate(
+                        order.date
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${paymentMethod}
+
+                </td>
+
+
+                <td>
+
+                    <strong>
+
+                        ${formatMoney(
+                            order.total
+                        )}
+
+                    </strong>
+
+                </td>
+
+
+                <td>
+
+                    <span class="
+                        order-status
+                        status-${getStatusClass(
+                            status
+                        )}
+                    ">
+
+                        ${status}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <button
+                        class="view-order-btn"
+                        data-id="${order.id}"
+                        title="View Order"
+                    >
+
+                        <i class="fa-solid fa-eye"></i>
+
+                    </button>
+
+                </td>
+
+            `;
+
+
+            // ==================================
+            // VIEW BUTTON
+            // ==================================
+
+            const viewButton =
+                row.querySelector(
+                    ".view-order-btn"
+                );
+
+
+            viewButton.addEventListener(
+                "click",
+                function () {
+
+                    viewOrder(
+                        this.dataset.id
+                    );
+
+                }
+            );
+
+
+            tableBody.appendChild(
+                row
+            );
+
+        }
+    );
 
 }
 
@@ -378,7 +702,15 @@ function viewOrder(
         );
 
 
-    if (!order) return;
+    if (!order) {
+
+        alert(
+            "Order could not be found."
+        );
+
+        return;
+
+    }
 
 
     const customer =
@@ -386,61 +718,150 @@ function viewOrder(
         {};
 
 
-    const details =
-        document.getElementById(
-            "orderDetails"
-        );
+    const items =
+        Array.isArray(
+            order.items
+        )
+            ? order.items
+            : [];
 
 
     let productsHTML = "";
 
 
-    order.items.forEach(
-        item => {
+    if (
+        items.length === 0
+    ) {
 
-            productsHTML += `
+        productsHTML = `
 
-                <div class="order-product-row">
+            <p>
+                No products found for this order.
+            </p>
 
-                    <span>
+        `;
 
-                        ${item.name}
+    }
 
-                        × ${item.quantity}
+    else {
 
-                    </span>
+        items.forEach(
+            item => {
 
-                    <strong>
-
-                        ${formatMoney(
-                            item.price *
-                            item.quantity
-                        )}
-
-                    </strong>
-
-                </div>
-
-            `;
-
-        }
-    );
+                const itemName =
+                    item.name ||
+                    item.productName ||
+                    "Product";
 
 
-    details.innerHTML = `
+                const quantity =
+                    Number(
+                        item.quantity || 0
+                    );
+
+
+                const price =
+                    Number(
+                        item.price || 0
+                    );
+
+
+                productsHTML += `
+
+                    <div class="order-product-row">
+
+                        <span>
+
+                            ${itemName}
+
+                            × ${quantity}
+
+                        </span>
+
+
+                        <strong>
+
+                            ${formatMoney(
+                                price *
+                                quantity
+                            )}
+
+                        </strong>
+
+                    </div>
+
+                `;
+
+            }
+        );
+
+    }
+
+
+    const orderNumber =
+        order.orderId ||
+        order.id;
+
+
+    const customerName =
+        customer.name ||
+        order.customerName ||
+        "N/A";
+
+
+    const customerPhone =
+        customer.phone ||
+        "N/A";
+
+
+    const customerEmail =
+        customer.email ||
+        "N/A";
+
+
+    const customerCity =
+        customer.city ||
+        customer.location ||
+        "N/A";
+
+
+    const customerAddress =
+        customer.address ||
+        "N/A";
+
+
+    const customerNote =
+        customer.note ||
+        "";
+
+
+    const paymentMethod =
+        order.paymentMethod ||
+        "Not specified";
+
+
+    const status =
+        order.status ||
+        "Pending";
+
+
+    orderDetails.innerHTML = `
 
         <div class="order-details-header">
 
             <h2>
 
-                ${order.id}
+                ${orderNumber}
 
             </h2>
+
 
             <p>
 
                 Placed on
-                ${formatDate(order.date)}
+                ${formatDate(
+                    order.date
+                )}
 
             </p>
 
@@ -457,35 +878,41 @@ function viewOrder(
             <div class="order-customer-box">
 
                 <strong>
-                    ${customer.name || "N/A"}
+
+                    ${customerName}
+
                 </strong>
 
                 <br>
 
                 Phone:
-                ${customer.phone || "N/A"}
+                ${customerPhone}
 
                 <br>
 
                 Email:
-                ${customer.email || "N/A"}
+                ${customerEmail}
 
                 <br>
 
                 City:
-                ${customer.city || "N/A"}
+                ${customerCity}
 
                 <br>
 
                 Address:
-                ${customer.address || "N/A"}
+                ${customerAddress}
+
 
                 ${
-                    customer.note
+                    customerNote
                     ? `
+
                         <br>
+
                         Note:
-                        ${customer.note}
+                        ${customerNote}
+
                     `
                     : ""
                 }
@@ -498,8 +925,11 @@ function viewOrder(
         <div class="order-detail-section">
 
             <h3>
+
                 Ordered Products
+
             </h3>
+
 
             ${productsHTML}
 
@@ -509,11 +939,18 @@ function viewOrder(
         <div class="order-total-box">
 
             <span>
+
                 TOTAL
+
             </span>
 
+
             <strong>
-                ${formatMoney(order.total)}
+
+                ${formatMoney(
+                    order.total
+                )}
+
             </strong>
 
         </div>
@@ -522,15 +959,18 @@ function viewOrder(
         <div class="order-detail-section">
 
             <h3>
+
                 Payment
+
             </h3>
+
 
             <p style="
                 font-size:10px;
                 color:#6b7280;
             ">
 
-                ${order.paymentMethod}
+                ${paymentMethod}
 
             </p>
 
@@ -540,19 +980,20 @@ function viewOrder(
         <div class="order-status-control">
 
             <h3>
+
                 Update Order Status
+
             </h3>
 
 
-            <select
-                id="modalStatus"
-                onchange="updateOrderStatus('${order.id}', this.value)">
+            <select id="modalStatus">
 
                 <option
                     value="Pending"
-                    ${order.status === "Pending"
+                    ${status === "Pending"
                         ? "selected"
-                        : ""}>
+                        : ""}
+                >
 
                     Pending
 
@@ -561,9 +1002,10 @@ function viewOrder(
 
                 <option
                     value="Processing"
-                    ${order.status === "Processing"
+                    ${status === "Processing"
                         ? "selected"
-                        : ""}>
+                        : ""}
+                >
 
                     Processing
 
@@ -572,9 +1014,10 @@ function viewOrder(
 
                 <option
                     value="Completed"
-                    ${order.status === "Completed"
+                    ${status === "Completed"
                         ? "selected"
-                        : ""}>
+                        : ""}
+                >
 
                     Completed
 
@@ -583,9 +1026,10 @@ function viewOrder(
 
                 <option
                     value="Cancelled"
-                    ${order.status === "Cancelled"
+                    ${status === "Cancelled"
                         ? "selected"
-                        : ""}>
+                        : ""}
+                >
 
                     Cancelled
 
@@ -598,7 +1042,8 @@ function viewOrder(
 
         <button
             class="print-order-btn"
-            onclick="printOrder('${order.id}')">
+            id="printOrderButton"
+        >
 
             <i class="fa-solid fa-print"></i>
 
@@ -609,22 +1054,60 @@ function viewOrder(
     `;
 
 
+    // ==================================
+    // STATUS CHANGE
+    // ==================================
+
     document
         .getElementById(
-            "orderModal"
+            "modalStatus"
         )
-        .classList.add(
-            "show"
+        .addEventListener(
+            "change",
+            function () {
+
+                updateOrderStatus(
+                    order.id,
+                    this.value
+                );
+
+            }
         );
+
+
+    // ==================================
+    // PRINT
+    // ==================================
+
+    document
+        .getElementById(
+            "printOrderButton"
+        )
+        .addEventListener(
+            "click",
+            function () {
+
+                printOrder(
+                    order.id
+                );
+
+            }
+        );
+
+
+    orderModal.classList.add(
+        "show"
+    );
 
 }
 
 
 // ==========================================
-// UPDATE STATUS
+// UPDATE ORDER STATUS
+// FIREBASE
 // ==========================================
 
-function updateOrderStatus(
+async function updateOrderStatus(
     orderId,
     newStatus
 ) {
@@ -637,24 +1120,72 @@ function updateOrderStatus(
         );
 
 
-    if (!order) return;
+    if (!order) {
+
+        alert(
+            "Order could not be found."
+        );
+
+        return;
+
+    }
 
 
-    order.status =
-        newStatus;
+    try {
+
+        const orderRef =
+            doc(
+                db,
+                "orders",
+                orderId
+            );
 
 
-    localStorage.setItem(
-        "orders",
-        JSON.stringify(
-            orders
-        )
-    );
+        await updateDoc(
+            orderRef,
+            {
+
+                status:
+                    newStatus
+
+            }
+        );
 
 
-    updateStats();
+        // Update local array
 
-    displayOrders();
+        order.status =
+            newStatus;
+
+
+        updateStats();
+
+        displayOrders();
+
+
+        // Refresh modal
+
+        viewOrder(
+            orderId
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error updating order:",
+            error
+        );
+
+
+        alert(
+            "Order status could not be updated.\n\n" +
+            error.message
+        );
+
+    }
 
 }
 
@@ -675,7 +1206,15 @@ function printOrder(
         );
 
 
-    if (!order) return;
+    if (!order) {
+
+        alert(
+            "Order could not be found."
+        );
+
+        return;
+
+    }
 
 
     const customer =
@@ -683,33 +1222,72 @@ function printOrder(
         {};
 
 
+    const items =
+        Array.isArray(
+            order.items
+        )
+            ? order.items
+            : [];
+
+
     let itemsHTML = "";
 
 
-    order.items.forEach(
+    items.forEach(
         item => {
+
+            const name =
+                item.name ||
+                item.productName ||
+                "Product";
+
+
+            const quantity =
+                Number(
+                    item.quantity || 0
+                );
+
+
+            const price =
+                Number(
+                    item.price || 0
+                );
+
 
             itemsHTML += `
 
                 <tr>
 
                     <td>
-                        ${item.name}
+
+                        ${name}
+
                     </td>
 
-                    <td>
-                        ${item.quantity}
-                    </td>
 
                     <td>
-                        ${formatMoney(item.price)}
+
+                        ${quantity}
+
                     </td>
 
+
                     <td>
+
                         ${formatMoney(
-                            item.price *
-                            item.quantity
+                            price
                         )}
+
+                    </td>
+
+
+                    <td>
+
+                        ${formatMoney(
+                            price *
+                            quantity
+                        )}
+
                     </td>
 
                 </tr>
@@ -727,6 +1305,17 @@ function printOrder(
         );
 
 
+    if (!printWindow) {
+
+        alert(
+            "Please allow pop-ups to print the order."
+        );
+
+        return;
+
+    }
+
+
     printWindow.document.write(`
 
         <!DOCTYPE html>
@@ -736,44 +1325,75 @@ function printOrder(
         <head>
 
             <title>
-                ${order.id}
+
+                ${order.orderId || order.id}
+
             </title>
+
 
             <style>
 
                 body {
+
                     font-family: Arial;
+
                     padding: 40px;
+
                     color: #222;
+
                 }
+
 
                 h1 {
+
                     color: #4c1d95;
+
                 }
+
 
                 .customer {
+
                     margin: 25px 0;
+
                     line-height: 1.7;
+
                 }
 
+
                 table {
+
                     width: 100%;
+
                     border-collapse: collapse;
+
                     margin-top: 20px;
+
                 }
+
 
                 th,
                 td {
+
                     padding: 12px;
-                    border-bottom: 1px solid #ddd;
+
+                    border-bottom:
+                        1px solid #ddd;
+
                     text-align: left;
+
                 }
 
+
                 .total {
+
                     text-align: right;
+
                     font-size: 20px;
+
                     font-weight: bold;
+
                     margin-top: 25px;
+
                 }
 
             </style>
@@ -784,12 +1404,19 @@ function printOrder(
         <body>
 
             <h1>
+
                 BizManager
+
             </h1>
 
+
             <h2>
-                Order ${order.id}
+
+                Order
+                ${order.orderId || order.id}
+
             </h2>
+
 
             <div class="customer">
 
@@ -797,31 +1424,60 @@ function printOrder(
                     Customer:
                 </strong>
 
-                ${customer.name || "N/A"}
+                ${customer.name ||
+                    order.customerName ||
+                    "N/A"}
 
                 <br>
+
 
                 <strong>
                     Phone:
                 </strong>
 
-                ${customer.phone || "N/A"}
+                ${customer.phone ||
+                    "N/A"}
 
                 <br>
+
+
+                <strong>
+                    Email:
+                </strong>
+
+                ${customer.email ||
+                    "N/A"}
+
+                <br>
+
 
                 <strong>
                     Address:
                 </strong>
 
-                ${customer.address || "N/A"}
+                ${customer.address ||
+                    customer.city ||
+                    "N/A"}
 
                 <br>
+
 
                 <strong>
                     Payment:
                 </strong>
 
-                ${order.paymentMethod}
+                ${order.paymentMethod ||
+                    "Not specified"}
+
+                <br>
+
+
+                <strong>
+                    Status:
+                </strong>
+
+                ${order.status ||
+                    "Pending"}
 
             </div>
 
@@ -865,7 +1521,9 @@ function printOrder(
             <div class="total">
 
                 Total:
-                ${formatMoney(order.total)}
+                ${formatMoney(
+                    order.total
+                )}
 
             </div>
 
@@ -878,6 +1536,10 @@ function printOrder(
 
     printWindow.document.close();
 
+
+    printWindow.focus();
+
+
     printWindow.print();
 
 }
@@ -887,44 +1549,157 @@ function printOrder(
 // CLOSE MODAL
 // ==========================================
 
-document.getElementById(
-    "closeOrderModal"
-).addEventListener(
-    "click",
-    function() {
+if (closeOrderModal) {
 
-        document
-            .getElementById(
-                "orderModal"
-            )
-            .classList.remove(
+    closeOrderModal.addEventListener(
+        "click",
+        function () {
+
+            orderModal.classList.remove(
                 "show"
             );
 
-    }
-);
+        }
+    );
+
+}
 
 
 // ==========================================
-// SEARCH & FILTER
+// CLOSE MODAL WHEN CLICKING OUTSIDE
 // ==========================================
 
-searchInput.addEventListener(
-    "input",
-    displayOrders
-);
+if (orderModal) {
 
+    orderModal.addEventListener(
+        "click",
+        function (event) {
 
-statusFilter.addEventListener(
-    "change",
-    displayOrders
-);
+            if (
+                event.target ===
+                orderModal
+            ) {
+
+                orderModal.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+}
 
 
 // ==========================================
-// START
+// SEARCH
 // ==========================================
 
-updateStats();
+if (searchInput) {
 
-displayOrders();
+    searchInput.addEventListener(
+        "input",
+        displayOrders
+    );
+
+}
+
+
+// ==========================================
+// STATUS FILTER
+// ==========================================
+
+if (statusFilter) {
+
+    statusFilter.addEventListener(
+        "change",
+        displayOrders
+    );
+
+}
+
+
+// ==========================================
+// MOBILE SIDEBAR
+// ==========================================
+
+const menuToggle =
+    document.getElementById(
+        "menuToggle"
+    );
+
+
+const sidebar =
+    document.querySelector(
+        ".sidebar"
+    );
+
+
+if (
+    menuToggle &&
+    sidebar
+) {
+
+    menuToggle.addEventListener(
+        "click",
+        function () {
+
+            sidebar.classList.toggle(
+                "open"
+            );
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+const logoutBtn =
+    document.getElementById(
+        "logoutBtn"
+    );
+
+
+if (logoutBtn) {
+
+    logoutBtn.addEventListener(
+        "click",
+        function () {
+
+            if (
+                confirm(
+                    "Are you sure you want to logout?"
+                )
+            ) {
+
+                localStorage.removeItem(
+                    "adminLoggedIn"
+                );
+
+
+                localStorage.removeItem(
+                    "adminEmail"
+                );
+
+
+                window.location.href =
+                    "login.html";
+
+            }
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// INITIAL LOAD
+// ==========================================
+
+loadOrders();

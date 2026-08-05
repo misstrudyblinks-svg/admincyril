@@ -1,6 +1,21 @@
 // ==========================================
 // BIZMANAGER DASHBOARD
+// FIREBASE FIRESTORE VERSION
 // ==========================================
+
+
+// ==========================================
+// FIREBASE IMPORTS
+// ==========================================
+
+import {
+    collection,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import {
+    db
+} from "./firebase-config.js";
 
 
 // ==========================================
@@ -15,9 +30,36 @@ const isLoggedIn =
 
 if (isLoggedIn !== "true") {
 
-    window.location.href = "login.html";
+    window.location.href =
+        "login.html";
 
 }
+
+
+// ==========================================
+// FIREBASE COLLECTIONS
+// ==========================================
+
+const ordersCollection =
+    collection(
+        db,
+        "orders"
+    );
+
+const productsCollection =
+    collection(
+        db,
+        "products"
+    );
+
+
+// ==========================================
+// DATA
+// ==========================================
+
+let orders = [];
+
+let products = [];
 
 
 // ==========================================
@@ -25,19 +67,28 @@ if (isLoggedIn !== "true") {
 // ==========================================
 
 const menuToggle =
-    document.getElementById("menuToggle");
+    document.getElementById(
+        "menuToggle"
+    );
 
 const sidebar =
-    document.getElementById("sidebar");
+    document.getElementById(
+        "sidebar"
+    );
 
 
-if (menuToggle && sidebar) {
+if (
+    menuToggle &&
+    sidebar
+) {
 
     menuToggle.addEventListener(
         "click",
         function () {
 
-            sidebar.classList.toggle("open");
+            sidebar.classList.toggle(
+                "open"
+            );
 
         }
     );
@@ -50,7 +101,9 @@ if (menuToggle && sidebar) {
 // ==========================================
 
 const logoutBtn =
-    document.getElementById("logoutBtn");
+    document.getElementById(
+        "logoutBtn"
+    );
 
 
 if (logoutBtn) {
@@ -91,7 +144,10 @@ if (logoutBtn) {
 // ==========================================
 
 const adminEmail =
-    localStorage.getItem("adminEmail");
+    localStorage.getItem(
+        "adminEmail"
+    );
+
 
 console.log(
     "Logged in admin:",
@@ -100,43 +156,14 @@ console.log(
 
 
 // ==========================================
-// LOAD DATA
-// ==========================================
-
-function getOrders() {
-
-    return JSON.parse(
-        localStorage.getItem("orders")
-    ) || [];
-
-}
-
-
-function getProducts() {
-
-    return JSON.parse(
-        localStorage.getItem("products")
-    ) || [];
-
-}
-
-
-function getCustomers() {
-
-    return JSON.parse(
-        localStorage.getItem("customers")
-    ) || [];
-
-}
-
-
-// ==========================================
 // FORMAT MONEY
 // ==========================================
 
 function formatMoney(amount) {
 
-    return `GH₵ ${Number(amount || 0).toLocaleString(
+    return `GH₵ ${Number(
+        amount || 0
+    ).toLocaleString(
         "en-GH",
         {
             minimumFractionDigits: 2,
@@ -178,24 +205,15 @@ function getProductName(product) {
 
 
 // ==========================================
-// UPDATE STATISTICS
+// UPDATE DASHBOARD STATISTICS
 // ==========================================
 
 function updateDashboardStats() {
 
-    const orders =
-        getOrders();
 
-    const products =
-        getProducts();
-
-    const customers =
-        getCustomers();
-
-
-    // --------------------------------------
+    // ======================================
     // TOTAL SALES
-    // --------------------------------------
+    // ======================================
 
     const totalSales =
         orders
@@ -208,20 +226,23 @@ function updateDashboardStats() {
                 (
                     total,
                     order
-                ) =>
-                    total +
-                    Number(
-                        order.total
-                    ),
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            order.total || 0
+                        )
+                    );
+
+                },
                 0
             );
 
 
-    // --------------------------------------
+    // ======================================
     // TOTAL REVENUE
-    // --------------------------------------
-
-    // Revenue comes from completed orders.
+    // ======================================
 
     const totalRevenue =
         orders
@@ -234,91 +255,93 @@ function updateDashboardStats() {
                 (
                     total,
                     order
-                ) =>
-                    total +
-                    Number(
-                        order.total
-                    ),
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            order.total || 0
+                        )
+                    );
+
+                },
                 0
             );
 
 
-    // --------------------------------------
+    // ======================================
     // CUSTOMERS
-    // --------------------------------------
+    // ======================================
 
-    let customerCount =
-        customers.length;
+    const uniqueCustomers =
+        new Set();
 
 
-    // If no customers LocalStorage exists,
-    // calculate unique customers from orders.
+    orders.forEach(
+        order => {
 
-    if (customerCount === 0) {
+            const customer =
+                order.customer ||
+                {};
 
-        const uniqueCustomers =
-            new Set();
 
-        orders.forEach(
-            order => {
+            if (
+                customer.phone
+            ) {
 
-                if (
-                    order.customer &&
-                    order.customer.phone
-                ) {
-
-                    uniqueCustomers.add(
-                        order.customer.phone
-                    );
-
-                }
-                else if (
-                    order.customer &&
-                    order.customer.email
-                ) {
-
-                    uniqueCustomers.add(
-                        order.customer.email
-                    );
-
-                }
+                uniqueCustomers.add(
+                    customer.phone
+                );
 
             }
-        );
+
+            else if (
+                customer.email
+            ) {
+
+                uniqueCustomers.add(
+                    customer.email
+                );
+
+            }
+
+        }
+    );
 
 
-        customerCount =
-            uniqueCustomers.size;
-
-    }
+    const customerCount =
+        uniqueCustomers.size;
 
 
-    // --------------------------------------
+    // ======================================
     // PRODUCTS
-    // --------------------------------------
+    // ======================================
 
     const productCount =
         products.length;
 
 
-    // --------------------------------------
+    // ======================================
     // DISPLAY
-    // --------------------------------------
+    // ======================================
 
     const totalSalesElement =
         document.getElementById(
             "totalSales"
         );
 
+
     const totalRevenueElement =
         document.getElementById(
             "totalRevenue"
         );
 
+
     const totalCustomersElement =
         document.getElementById(
             "totalCustomers"
         );
+
 
     const totalProductsElement =
         document.getElementById(
@@ -326,23 +349,33 @@ function updateDashboardStats() {
         );
 
 
-    if (totalSalesElement) {
+    if (
+        totalSalesElement
+    ) {
 
         totalSalesElement.textContent =
-            formatMoney(totalSales);
+            formatMoney(
+                totalSales
+            );
 
     }
 
 
-    if (totalRevenueElement) {
+    if (
+        totalRevenueElement
+    ) {
 
         totalRevenueElement.textContent =
-            formatMoney(totalRevenue);
+            formatMoney(
+                totalRevenue
+            );
 
     }
 
 
-    if (totalCustomersElement) {
+    if (
+        totalCustomersElement
+    ) {
 
         totalCustomersElement.textContent =
             customerCount;
@@ -350,7 +383,9 @@ function updateDashboardStats() {
     }
 
 
-    if (totalProductsElement) {
+    if (
+        totalProductsElement
+    ) {
 
         totalProductsElement.textContent =
             productCount;
@@ -365,12 +400,6 @@ function updateDashboardStats() {
 // ==========================================
 
 function updateRecentSales() {
-
-    const orders =
-        getOrders();
-
-
-    // Find the table body in dashboard
 
     const tableBody =
         document.getElementById(
@@ -392,14 +421,21 @@ function updateRecentSales() {
     tableBody.innerHTML = "";
 
 
-    if (orders.length === 0) {
+    if (
+        orders.length === 0
+    ) {
 
         tableBody.innerHTML = `
 
             <tr>
 
-                <td colspan="4"
-                    style="text-align:center;padding:25px;">
+                <td
+                    colspan="4"
+                    style="
+                        text-align:center;
+                        padding:25px;
+                    "
+                >
 
                     No sales yet.
 
@@ -414,7 +450,9 @@ function updateRecentSales() {
     }
 
 
-    // Latest orders first
+    // ======================================
+    // SORT NEWEST FIRST
+    // ======================================
 
     const recentOrders =
         orders
@@ -423,15 +461,28 @@ function updateRecentSales() {
                 (
                     a,
                     b
-                ) =>
-                    new Date(b.date) -
-                    new Date(a.date)
+                ) => {
+
+                    return (
+                        new Date(
+                            b.date || 0
+                        ) -
+                        new Date(
+                            a.date || 0
+                        )
+                    );
+
+                }
             )
             .slice(
                 0,
                 5
             );
 
+
+    // ======================================
+    // DISPLAY
+    // ======================================
 
     recentOrders.forEach(
         order => {
@@ -443,6 +494,7 @@ function updateRecentSales() {
 
             const customerName =
                 customer.name ||
+                order.customerName ||
                 "Unknown Customer";
 
 
@@ -455,14 +507,19 @@ function updateRecentSales() {
                                 .charAt(0)
                                 .toUpperCase()
                     )
-                    .slice(0, 2)
+                    .slice(
+                        0,
+                        2
+                    )
                     .join("");
 
 
             const firstProduct =
                 order.items &&
                 order.items.length > 0
+
                     ? order.items[0].name
+
                     : "Order";
 
 
@@ -494,7 +551,10 @@ function updateRecentSales() {
 
                         <div class="customer-avatar">
 
-                            ${initials || "CU"}
+                            ${
+                                initials ||
+                                "CU"
+                            }
 
                         </div>
 
@@ -516,9 +576,11 @@ function updateRecentSales() {
                     ${
                         order.items &&
                         order.items.length > 1
+
                             ? ` + ${
                                 order.items.length - 1
                             } more`
+
                             : ""
                     }
 
@@ -527,14 +589,18 @@ function updateRecentSales() {
 
                 <td>
 
-                    ${formatMoney(order.total)}
+                    ${formatMoney(
+                        order.total
+                    )}
 
                 </td>
 
 
                 <td>
 
-                    <span class="status ${statusClass}">
+                    <span
+                        class="status ${statusClass}"
+                    >
 
                         ${status}
 
@@ -561,10 +627,6 @@ function updateRecentSales() {
 
 function updateLowStock() {
 
-    const products =
-        getProducts();
-
-
     const lowStockContainer =
         document.getElementById(
             "lowStockList"
@@ -585,18 +647,22 @@ function updateLowStock() {
     lowStockContainer.innerHTML = "";
 
 
-    // Products with 0 or less are also included
+    // ======================================
+    // FIND LOW STOCK PRODUCTS
+    // ======================================
 
     const lowStockProducts =
         products.filter(
             product =>
-                getProductStock(product) <= 5
+                getProductStock(
+                    product
+                ) <= 5
         );
 
 
-    // --------------------------------------
+    // ======================================
     // NO LOW STOCK
-    // --------------------------------------
+    // ======================================
 
     if (
         lowStockProducts.length === 0
@@ -612,20 +678,29 @@ function updateLowStock() {
 
                 </div>
 
+
                 <div class="stock-info">
 
                     <strong>
+
                         Stock looks good
+
                     </strong>
 
+
                     <span>
+
                         No products need attention
+
                     </span>
 
                 </div>
 
+
                 <span class="stock-number">
+
                     0
+
                 </span>
 
             </div>
@@ -637,18 +712,24 @@ function updateLowStock() {
     }
 
 
-    // --------------------------------------
-    // DISPLAY LOW STOCK
-    // --------------------------------------
+    // ======================================
+    // SORT LOWEST STOCK FIRST
+    // ======================================
 
     lowStockProducts
+        .slice()
         .sort(
             (
                 a,
                 b
-            ) =>
-                getProductStock(a) -
-                getProductStock(b)
+            ) => {
+
+                return (
+                    getProductStock(a) -
+                    getProductStock(b)
+                );
+
+            }
         )
         .slice(
             0,
@@ -676,7 +757,9 @@ function updateLowStock() {
                         .includes(
                             "phone"
                         )
+
                         ? "fa-mobile-screen"
+
                         : "fa-box";
 
 
@@ -694,7 +777,12 @@ function updateLowStock() {
 
                     <div class="product-icon">
 
-                        <i class="fa-solid ${icon}"></i>
+                        <i
+                            class="
+                                fa-solid
+                                ${icon}
+                            "
+                        ></i>
 
                     </div>
 
@@ -703,24 +791,37 @@ function updateLowStock() {
 
                         <strong>
 
-                            ${getProductName(product)}
+                            ${getProductName(
+                                product
+                            )}
 
                         </strong>
 
+
                         <span>
 
-                            ${product.category || "Product"}
+                            ${
+                                product.category ||
+                                "Product"
+                            }
 
                         </span>
 
                     </div>
 
 
-                    <span class="stock-number ${stockClass}">
+                    <span
+                        class="
+                            stock-number
+                            ${stockClass}
+                        "
+                    >
 
                         ${
                             stock <= 0
+
                                 ? "Out of stock"
+
                                 : `${stock} left`
                         }
 
@@ -755,60 +856,272 @@ function refreshDashboard() {
 
 
 // ==========================================
-// LISTEN FOR STORAGE CHANGES
+// FIREBASE ORDERS LISTENER
 // ==========================================
 
-window.addEventListener(
-    "storage",
-    function(event) {
+function loadOrdersFromFirebase() {
 
-        if (
-            event.key === "orders" ||
-            event.key === "products" ||
-            event.key === "customers"
-        ) {
+    onSnapshot(
+
+        ordersCollection,
+
+        snapshot => {
+
+            orders =
+                snapshot.docs.map(
+                    documentSnapshot => ({
+
+                        id:
+                            documentSnapshot.id,
+
+                        ...documentSnapshot.data()
+
+                    })
+                );
+
+
+            console.log(
+                "Dashboard orders loaded:",
+                orders
+            );
+
 
             refreshDashboard();
 
+        },
+
+        error => {
+
+            console.error(
+                "Firebase orders error:",
+                error
+            );
+
         }
 
-    }
-);
+    );
+
+}
 
 
 // ==========================================
-// REFRESH WHEN PAGE BECOMES VISIBLE
+// FIREBASE PRODUCTS LISTENER
 // ==========================================
 
-document.addEventListener(
-    "visibilitychange",
-    function() {
+function loadProductsFromFirebase() {
 
-        if (
-            document.visibilityState ===
-            "visible"
-        ) {
+    onSnapshot(
+
+        productsCollection,
+
+        snapshot => {
+
+            products =
+                snapshot.docs.map(
+                    documentSnapshot => ({
+
+                        id:
+                            documentSnapshot.id,
+
+                        ...documentSnapshot.data()
+
+                    })
+                );
+
+
+            console.log(
+                "Dashboard products loaded:",
+                products
+            );
+
 
             refreshDashboard();
 
+        },
+
+        error => {
+
+            console.error(
+                "Firebase products error:",
+                error
+            );
+
         }
 
-    }
-);
+    );
+
+}
 
 
 // ==========================================
-// INITIAL LOAD
+// QUICK ACTIONS
 // ==========================================
 
-refreshDashboard();
+
+// ADD CUSTOMER
+
+const addCustomerBtn =
+    document.getElementById(
+        "addCustomerBtn"
+    );
+
+if (addCustomerBtn) {
+
+    addCustomerBtn.addEventListener(
+        "click",
+        function () {
+
+            window.location.href =
+                "customers.html";
+
+        }
+    );
+
+}
+
+
+// ADD PRODUCT
+
+const addProductBtn =
+    document.getElementById(
+        "addProductBtn"
+    );
+
+if (addProductBtn) {
+
+    addProductBtn.addEventListener(
+        "click",
+        function () {
+
+            window.location.href =
+                "products.html";
+
+        }
+    );
+
+}
+
+
+// NEW SALE
+
+const newSaleBtn =
+    document.getElementById(
+        "newSaleBtn"
+    );
+
+if (newSaleBtn) {
+
+    newSaleBtn.addEventListener(
+        "click",
+        function () {
+
+            window.location.href =
+                "sales.html";
+
+        }
+    );
+
+}
+
+
+// CREATE INVOICE
+
+const createInvoiceBtn =
+    document.getElementById(
+        "createInvoiceBtn"
+    );
+
+if (createInvoiceBtn) {
+
+    createInvoiceBtn.addEventListener(
+        "click",
+        function () {
+
+            window.location.href =
+                "invoices.html";
+
+        }
+    );
+
+}
 
 
 // ==========================================
-// AUTO REFRESH
+// VIEW ALL ORDERS
 // ==========================================
 
-setInterval(
-    refreshDashboard,
-    2000
+const viewAllOrdersBtn =
+    document.getElementById(
+        "viewAllOrdersBtn"
+    );
+
+if (viewAllOrdersBtn) {
+
+    viewAllOrdersBtn.addEventListener(
+        "click",
+        function () {
+
+            window.location.href =
+                "orders.html";
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// VIEW ALL PRODUCTS
+// ==========================================
+
+const viewAllProductsBtn =
+    document.getElementById(
+        "viewAllProductsBtn"
+    );
+
+if (viewAllProductsBtn) {
+
+    viewAllProductsBtn.addEventListener(
+        "click",
+        function () {
+
+            window.location.href =
+                "products.html";
+
+        }
+    );
+
+}
+
+const lowStockSummary =
+    document.getElementById("lowStockSummary");
+
+if (lowStockSummary) {
+
+    lowStockSummary.textContent =
+        lowStockProducts.length === 0
+            ? "No low stock products"
+            : `${lowStockProducts.length} low stock product${
+                lowStockProducts.length === 1
+                    ? ""
+                    : "s"
+            }`;
+
+}
+
+// ==========================================
+// START FIREBASE LISTENERS
+// ==========================================
+
+loadOrdersFromFirebase();
+
+loadProductsFromFirebase();
+
+
+// ==========================================
+// LOG
+// ==========================================
+
+console.log(
+    "BizManager Dashboard Firebase Loaded Successfully"
 );

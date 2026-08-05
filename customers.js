@@ -1,6 +1,22 @@
 // ==========================================
-// CUSTOMER MANAGEMENT SYSTEM
+// BIZMANAGER CUSTOMER MANAGEMENT
+// FIREBASE FIRESTORE VERSION
 // ==========================================
+
+import {
+    db
+} from "./firebase-config.js";
+
+import {
+    collection,
+    addDoc,
+    getDocs,
+    updateDoc,
+    deleteDoc,
+    doc,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 
 // ==========================================
@@ -15,6 +31,14 @@ if (loggedIn !== "true") {
     window.location.href = "login.html";
 
 }
+
+
+// ==========================================
+// FIREBASE COLLECTION
+// ==========================================
+
+const customersCollection =
+    collection(db, "customers");
 
 
 // ==========================================
@@ -73,13 +97,110 @@ const modalTitle =
 
 
 // ==========================================
-// CUSTOMER DATABASE
+// CUSTOMER DATA
 // ==========================================
 
-let customers =
-    JSON.parse(
-        localStorage.getItem("customers")
-    ) || [];
+let customers = [];
+
+
+// ==========================================
+// LOAD CUSTOMERS FROM FIREBASE
+// ==========================================
+
+async function loadCustomers() {
+
+    try {
+
+        customerTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    Loading customers...
+                </td>
+            </tr>
+        `;
+
+        const snapshot =
+            await getDocs(
+                customersCollection
+            );
+
+        customers = [];
+
+        snapshot.forEach(
+            documentSnapshot => {
+
+                customers.push({
+
+                    id:
+                        documentSnapshot.id,
+
+                    ...documentSnapshot.data()
+
+                });
+
+            }
+        );
+
+
+        // Sort newest first
+
+        customers.sort(
+            (a, b) => {
+
+                const dateA =
+                    new Date(
+                        a.date || 0
+                    );
+
+                const dateB =
+                    new Date(
+                        b.date || 0
+                    );
+
+                return dateB - dateA;
+
+            }
+        );
+
+
+        renderCustomers();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error loading customers:",
+            error
+        );
+
+        customerTableBody.innerHTML = "";
+
+        emptyCustomers.style.display =
+            "block";
+
+        emptyCustomers.innerHTML = `
+
+            <i class="fa-solid fa-triangle-exclamation"></i>
+
+            <h3>
+                Customers could not be loaded
+            </h3>
+
+            <p>
+                ${error.message}
+            </p>
+
+        `;
+
+        alert(
+            "Customers could not be loaded.\n\n" +
+            error.message
+        );
+
+    }
+
+}
 
 
 // ==========================================
@@ -97,7 +218,9 @@ openCustomerModal.addEventListener(
         modalTitle.textContent =
             "Add Customer";
 
-        customerModal.classList.add("show");
+        customerModal.classList.add(
+            "show"
+        );
 
     }
 );
@@ -109,14 +232,18 @@ openCustomerModal.addEventListener(
 
 function closeModal() {
 
-    customerModal.classList.remove("show");
+    customerModal.classList.remove(
+        "show"
+    );
 
 }
+
 
 closeCustomerModal.addEventListener(
     "click",
     closeModal
 );
+
 
 cancelCustomer.addEventListener(
     "click",
@@ -124,13 +251,18 @@ cancelCustomer.addEventListener(
 );
 
 
-// Close when clicking outside
+// ==========================================
+// CLOSE WHEN CLICKING OUTSIDE
+// ==========================================
 
 customerModal.addEventListener(
     "click",
     function (event) {
 
-        if (event.target === customerModal) {
+        if (
+            event.target ===
+            customerModal
+        ) {
 
             closeModal();
 
@@ -146,7 +278,7 @@ customerModal.addEventListener(
 
 customerForm.addEventListener(
     "submit",
-    function (event) {
+    async function (event) {
 
         event.preventDefault();
 
@@ -156,10 +288,6 @@ customerForm.addEventListener(
 
 
         const customerData = {
-
-            id:
-                id ||
-                Date.now().toString(),
 
             name:
                 customerName.value.trim(),
@@ -178,51 +306,113 @@ customerForm.addEventListener(
 
             date:
                 id
-                    ? customers.find(
-                        customer =>
-                        customer.id === id
-                    )?.date
+                    ? (
+                        customers.find(
+                            customer =>
+                                customer.id === id
+                        )?.date ||
+                        new Date().toISOString()
+                    )
                     : new Date().toISOString()
 
         };
 
 
-        // EDIT CUSTOMER
+        // ==================================
+        // VALIDATION
+        // ==================================
 
-        if (id) {
+        if (!customerData.name) {
 
-            customers =
-                customers.map(
-                    customer =>
-                        customer.id === id
-                            ? customerData
-                            : customer
-                );
+            alert(
+                "Please enter the customer's name."
+            );
+
+            return;
 
         }
 
-        // ADD CUSTOMER
 
-        else {
+        if (!customerData.phone) {
 
-            customers.push(
-                customerData
+            alert(
+                "Please enter the customer's phone number."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            // ==================================
+            // EDIT CUSTOMER
+            // ==================================
+
+            if (id) {
+
+                const customerRef =
+                    doc(
+                        db,
+                        "customers",
+                        id
+                    );
+
+                await updateDoc(
+                    customerRef,
+                    customerData
+                );
+
+                alert(
+                    "Customer updated successfully!"
+                );
+
+            }
+
+
+            // ==================================
+            // ADD CUSTOMER
+            // ==================================
+
+            else {
+
+                await addDoc(
+                    customersCollection,
+                    customerData
+                );
+
+                alert(
+                    "Customer added successfully!"
+                );
+
+            }
+
+
+            // Close modal
+
+            closeModal();
+
+
+            // Reload Firebase data
+
+            await loadCustomers();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Error saving customer:",
+                error
+            );
+
+            alert(
+                "Customer could not be saved.\n\n" +
+                error.message
             );
 
         }
-
-
-        // Save database
-
-        localStorage.setItem(
-            "customers",
-            JSON.stringify(customers)
-        );
-
-
-        closeModal();
-
-        renderCustomers();
 
     }
 );
@@ -239,36 +429,56 @@ function renderCustomers(
     customerTableBody.innerHTML = "";
 
 
+    const search =
+        searchTerm
+            .toLowerCase()
+            .trim();
+
+
     const filteredCustomers =
         customers.filter(
             customer => {
 
-                const search =
-                    searchTerm.toLowerCase();
+                const name =
+                    (
+                        customer.name ||
+                        ""
+                    ).toLowerCase();
+
+                const phone =
+                    (
+                        customer.phone ||
+                        ""
+                    ).toLowerCase();
+
+                const email =
+                    (
+                        customer.email ||
+                        ""
+                    ).toLowerCase();
+
+                const location =
+                    (
+                        customer.location ||
+                        ""
+                    ).toLowerCase();
+
 
                 return (
 
-                    customer.name
-                        .toLowerCase()
-                        .includes(search)
+                    name.includes(search)
 
                     ||
 
-                    customer.phone
-                        .toLowerCase()
-                        .includes(search)
+                    phone.includes(search)
 
                     ||
 
-                    customer.email
-                        .toLowerCase()
-                        .includes(search)
+                    email.includes(search)
 
                     ||
 
-                    customer.location
-                        .toLowerCase()
-                        .includes(search)
+                    location.includes(search)
 
                 );
 
@@ -276,7 +486,13 @@ function renderCustomers(
         );
 
 
-    if (filteredCustomers.length === 0) {
+    // ==================================
+    // EMPTY
+    // ==================================
+
+    if (
+        filteredCustomers.length === 0
+    ) {
 
         emptyCustomers.style.display =
             "block";
@@ -291,17 +507,29 @@ function renderCustomers(
     }
 
 
+    // ==================================
+    // CREATE ROWS
+    // ==================================
+
     filteredCustomers.forEach(
         customer => {
 
             const initials =
                 getInitials(
-                    customer.name
+                    customer.name ||
+                    "Customer"
                 );
 
 
             const row =
-                document.createElement("tr");
+                document.createElement(
+                    "tr"
+                );
+
+
+            const status =
+                customer.status ||
+                "Active";
 
 
             row.innerHTML = `
@@ -319,7 +547,7 @@ function renderCustomers(
                         <div>
 
                             <strong>
-                                ${customer.name}
+                                ${customer.name || "-"}
                             </strong>
 
                             <span>
@@ -352,10 +580,10 @@ function renderCustomers(
 
                     <span class="
                         customer-status
-                        ${customer.status.toLowerCase()}
+                        ${status.toLowerCase()}
                     ">
 
-                        ${customer.status}
+                        ${status}
 
                     </span>
 
@@ -368,7 +596,8 @@ function renderCustomers(
 
                         <button
                             class="customer-action-btn edit-btn"
-                            onclick="editCustomer('${customer.id}')">
+                            data-id="${customer.id}"
+                            title="Edit Customer">
 
                             <i class="fa-solid fa-pen"></i>
 
@@ -377,7 +606,8 @@ function renderCustomers(
 
                         <button
                             class="customer-action-btn delete-btn"
-                            onclick="deleteCustomer('${customer.id}')">
+                            data-id="${customer.id}"
+                            title="Delete Customer">
 
                             <i class="fa-solid fa-trash"></i>
 
@@ -390,7 +620,45 @@ function renderCustomers(
             `;
 
 
-            customerTableBody.appendChild(row);
+            // ==================================
+            // EDIT BUTTON
+            // ==================================
+
+            row
+                .querySelector(".edit-btn")
+                .addEventListener(
+                    "click",
+                    function () {
+
+                        editCustomer(
+                            this.dataset.id
+                        );
+
+                    }
+                );
+
+
+            // ==================================
+            // DELETE BUTTON
+            // ==================================
+
+            row
+                .querySelector(".delete-btn")
+                .addEventListener(
+                    "click",
+                    function () {
+
+                        deleteCustomer(
+                            this.dataset.id
+                        );
+
+                    }
+                );
+
+
+            customerTableBody.appendChild(
+                row
+            );
 
         }
     );
@@ -408,7 +676,8 @@ function renderCustomers(
 function getInitials(name) {
 
     return name
-        .split(" ")
+        .trim()
+        .split(/\s+/)
         .map(
             word =>
                 word.charAt(0)
@@ -433,26 +702,34 @@ function editCustomer(id) {
         );
 
 
-    if (!customer) return;
+    if (!customer) {
+
+        alert(
+            "Customer not found."
+        );
+
+        return;
+
+    }
 
 
     customerId.value =
         customer.id;
 
     customerName.value =
-        customer.name;
+        customer.name || "";
 
     customerPhone.value =
-        customer.phone;
+        customer.phone || "";
 
     customerEmail.value =
-        customer.email;
+        customer.email || "";
 
     customerLocation.value =
-        customer.location;
+        customer.location || "";
 
     customerStatus.value =
-        customer.status;
+        customer.status || "Active";
 
 
     modalTitle.textContent =
@@ -470,7 +747,7 @@ function editCustomer(id) {
 // DELETE CUSTOMER
 // ==========================================
 
-function deleteCustomer(id) {
+async function deleteCustomer(id) {
 
     const customer =
         customers.find(
@@ -479,7 +756,11 @@ function deleteCustomer(id) {
         );
 
 
-    if (!customer) return;
+    if (!customer) {
+
+        return;
+
+    }
 
 
     const confirmed =
@@ -488,23 +769,46 @@ function deleteCustomer(id) {
         );
 
 
-    if (!confirmed) return;
+    if (!confirmed) {
+
+        return;
+
+    }
 
 
-    customers =
-        customers.filter(
-            customer =>
-                customer.id !== id
+    try {
+
+        await deleteDoc(
+            doc(
+                db,
+                "customers",
+                id
+            )
         );
 
 
-    localStorage.setItem(
-        "customers",
-        JSON.stringify(customers)
-    );
+        alert(
+            "Customer deleted successfully!"
+        );
 
 
-    renderCustomers();
+        await loadCustomers();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error deleting customer:",
+            error
+        );
+
+        alert(
+            "Customer could not be deleted.\n\n" +
+            error.message
+        );
+
+    }
 
 }
 
@@ -531,9 +835,13 @@ customerSearch.addEventListener(
 
 function updateStatistics() {
 
+    // TOTAL
+
     const total =
         customers.length;
 
+
+    // ACTIVE
 
     const active =
         customers.filter(
@@ -541,6 +849,8 @@ function updateStatistics() {
                 customer.status === "Active"
         ).length;
 
+
+    // CURRENT MONTH
 
     const currentMonth =
         new Date().getMonth();
@@ -558,41 +868,58 @@ function updateStatistics() {
                         customer.date
                     );
 
+
                 return (
+
                     date.getMonth()
-                        === currentMonth
+                    ===
+                    currentMonth
 
                     &&
 
                     date.getFullYear()
-                        === currentYear
+                    ===
+                    currentYear
+
                 );
 
             }
         ).length;
 
 
+    // CONTACTS
+
+    const contacts =
+        customers.filter(
+            customer =>
+                customer.phone
+        ).length;
+
+
+    // DISPLAY
+
     document.getElementById(
         "customerCount"
-    ).textContent = total;
+    ).textContent =
+        total;
 
 
     document.getElementById(
         "activeCustomerCount"
-    ).textContent = active;
+    ).textContent =
+        active;
 
 
     document.getElementById(
         "newCustomerCount"
-    ).textContent = newThisMonth;
+    ).textContent =
+        newThisMonth;
 
 
     document.getElementById(
         "contactCount"
-    ).textContent = customers.filter(
-        customer =>
-            customer.phone
-    ).length;
+    ).textContent =
+        contacts;
 
 }
 
@@ -612,16 +939,23 @@ const sidebar =
     );
 
 
-menuToggle.addEventListener(
-    "click",
-    function () {
+if (
+    menuToggle &&
+    sidebar
+) {
 
-        sidebar.classList.toggle(
-            "open"
-        );
+    menuToggle.addEventListener(
+        "click",
+        function () {
 
-    }
-);
+            sidebar.classList.toggle(
+                "open"
+            );
+
+        }
+    );
+
+}
 
 
 // ==========================================
@@ -634,35 +968,39 @@ const logoutBtn =
     );
 
 
-logoutBtn.addEventListener(
-    "click",
-    function () {
+if (logoutBtn) {
 
-        if (
-            confirm(
-                "Are you sure you want to logout?"
-            )
-        ) {
+    logoutBtn.addEventListener(
+        "click",
+        function () {
 
-            localStorage.removeItem(
-                "adminLoggedIn"
-            );
+            if (
+                confirm(
+                    "Are you sure you want to logout?"
+                )
+            ) {
 
-            localStorage.removeItem(
-                "adminEmail"
-            );
+                localStorage.removeItem(
+                    "adminLoggedIn"
+                );
 
-            window.location.href =
-                "login.html";
+                localStorage.removeItem(
+                    "adminEmail"
+                );
+
+                window.location.href =
+                    "login.html";
+
+            }
 
         }
+    );
 
-    }
-);
+}
 
 
 // ==========================================
-// LOAD CUSTOMERS
+// START
 // ==========================================
 
-renderCustomers();
+loadCustomers();
