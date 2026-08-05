@@ -27,6 +27,10 @@ try {
             localStorage.getItem("shoppingCart")
         ) || [];
 
+    if (!Array.isArray(cart)) {
+        cart = [];
+    }
+
 }
 catch (error) {
 
@@ -98,7 +102,9 @@ if (cart.length === 0) {
 
 function displayCheckout() {
 
-    if (!checkoutItems) return;
+    if (!checkoutItems) {
+        return;
+    }
 
     checkoutItems.innerHTML = "";
 
@@ -263,43 +269,37 @@ function getPaymentMethod() {
 
 function getCustomerInformation() {
 
+    const getValue = function(id) {
+
+        const element =
+            document.getElementById(id);
+
+        return element
+            ? element.value.trim()
+            : "";
+
+    };
+
+
     return {
 
         name:
-            document
-                .getElementById("customerName")
-                .value
-                .trim(),
+            getValue("customerName"),
 
         phone:
-            document
-                .getElementById("customerPhone")
-                .value
-                .trim(),
+            getValue("customerPhone"),
 
         email:
-            document
-                .getElementById("customerEmail")
-                .value
-                .trim(),
+            getValue("customerEmail"),
 
         city:
-            document
-                .getElementById("customerCity")
-                .value
-                .trim(),
+            getValue("customerCity"),
 
         address:
-            document
-                .getElementById("customerAddress")
-                .value
-                .trim(),
+            getValue("customerAddress"),
 
         note:
-            document
-                .getElementById("customerNote")
-                .value
-                .trim()
+            getValue("customerNote")
 
     };
 
@@ -307,29 +307,44 @@ function getCustomerInformation() {
 
 
 // ==========================================
-// CREATE ORDER ITEMS
+// CREATE BASIC ORDER ITEMS
+// ==========================================
+//
+// Firebase stock and prices will be checked
+// again during checkout.
 // ==========================================
 
-function createOrderItems() {
+function createOrderItems(
+    verifiedItems
+) {
 
-    return cart.map(function(item) {
+    return verifiedItems.map(function(item) {
 
         return {
 
-            id:
-                item.id ||
-                item.productId ||
-                item.name,
+            productId:
+                item.productId,
 
             name:
-                item.name ||
-                "Unnamed Product",
+                item.name,
 
             price:
-                Number(item.price) || 0,
+                Number(
+                    item.price
+                ),
 
             quantity:
-                Number(item.quantity) || 0
+                Number(
+                    item.quantity
+                ),
+
+            subtotal:
+                Number(
+                    (
+                        item.price *
+                        item.quantity
+                    ).toFixed(2)
+                )
 
         };
 
@@ -388,39 +403,11 @@ if (checkoutForm) {
 
 
             // ==================================
-            // GET CUSTOMER
+            // CUSTOMER
             // ==================================
 
             const customer =
                 getCustomerInformation();
-
-
-            // ==================================
-            // CALCULATE TOTAL
-            // ==================================
-
-            const total =
-                cart.reduce(
-                    function(sum, item) {
-
-                        const price =
-                            Number(item.price) || 0;
-
-                        const quantity =
-                            Number(item.quantity) || 0;
-
-
-                        return (
-                            sum +
-                            (
-                                price *
-                                quantity
-                            )
-                        );
-
-                    },
-                    0
-                );
 
 
             // ==================================
@@ -440,13 +427,19 @@ if (checkoutForm) {
 
 
             // ==================================
-            // DISABLE BUTTON
+            // BUTTON
             // ==================================
 
             const placeOrderButton =
                 checkoutForm.querySelector(
                     'button[type="submit"]'
                 );
+
+
+            const originalButtonHTML =
+                placeOrderButton
+                    ? placeOrderButton.innerHTML
+                    : "";
 
 
             if (placeOrderButton) {
@@ -468,42 +461,49 @@ if (checkoutForm) {
             try {
 
                 // ==================================
+                // FIRESTORE ORDER REFERENCE
+                // ==================================
+
+               const orderRef =
+                            doc(
+                               db,
+                             "orders",
+                             generatedOrderNumber
+                             );
+
+                // ==================================
+                // VERIFIED ITEMS
+                // ==================================
+
+                let verifiedItems = [];
+
+
+                let verifiedTotal = 0;
+
+
+                // ==================================
                 // FIREBASE TRANSACTION
                 // ==================================
-                //
-                // This transaction:
-                //
-                // 1. Checks product stock
-                // 2. Reduces Firebase stock
-                // 3. Creates Firebase order
-                //
-                // Everything happens together.
-                //
-                // ==================================
-
-                const orderRef =
-                    doc(
-                        collection(
-                            db,
-                            "orders"
-                        )
-                    );
-
 
                 await runTransaction(
                     db,
                     async function(transaction) {
 
-                        const productRefs = [];
+                        const productsToUpdate = [];
 
 
                         // ==================================
-                        // READ ALL PRODUCTS FIRST
+                        // IMPORTANT:
+                        // ALL PRODUCT READS HAPPEN FIRST
                         // ==================================
 
                         for (
                             const cartItem of cart
                         ) {
+
+                            // ------------------------------
+                            // FIREBASE PRODUCT ID
+                            // ------------------------------
 
                             const productId =
                                 cartItem.id ||
@@ -513,11 +513,39 @@ if (checkoutForm) {
                             if (!productId) {
 
                                 throw new Error(
-                                    `Product "${cartItem.name}" does not have a valid Firebase ID.`
+                                    `Product "${cartItem.name || "Unknown"}" does not have a valid Firebase ID.`
                                 );
 
                             }
 
+
+                            // ------------------------------
+                            // QUANTITY
+                            // ------------------------------
+
+                            const requestedQuantity =
+                                Number(
+                                    cartItem.quantity
+                                );
+
+
+                            if (
+                                !Number.isInteger(
+                                    requestedQuantity
+                                ) ||
+                                requestedQuantity <= 0
+                            ) {
+
+                                throw new Error(
+                                    `Invalid quantity for "${cartItem.name || "product"}".`
+                                );
+
+                            }
+
+
+                            // ------------------------------
+                            // FIREBASE PRODUCT REFERENCE
+                            // ------------------------------
 
                             const productRef =
                                 doc(
@@ -528,6 +556,10 @@ if (checkoutForm) {
                                     )
                                 );
 
+
+                            // ------------------------------
+                            // GET CURRENT FIREBASE PRODUCT
+                            // ------------------------------
 
                             const productSnapshot =
                                 await transaction.get(
@@ -540,7 +572,7 @@ if (checkoutForm) {
                             ) {
 
                                 throw new Error(
-                                    `Product "${cartItem.name}" no longer exists.`
+                                    `Product "${cartItem.name || "Unknown"}" no longer exists.`
                                 );
 
                             }
@@ -550,6 +582,10 @@ if (checkoutForm) {
                                 productSnapshot.data();
 
 
+                            // ------------------------------
+                            // CURRENT FIREBASE STOCK
+                            // ------------------------------
+
                             const currentStock =
                                 Number(
                                     productData.stock ??
@@ -558,75 +594,157 @@ if (checkoutForm) {
                                 );
 
 
-                            const requestedQuantity =
+                            if (
+                                currentStock < 0
+                            ) {
+
+                                throw new Error(
+                                    `Invalid stock value for "${productData.name || cartItem.name}".`
+                                );
+
+                            }
+
+
+                            // ------------------------------
+                            // CHECK STOCK
+                            // ------------------------------
+
+                            if (
+                                requestedQuantity >
+                                currentStock
+                            ) {
+
+                                throw new Error(
+                                    `Not enough stock for "${productData.name || cartItem.name}". Available: ${currentStock}, requested: ${requestedQuantity}.`
+                                );
+
+                            }
+
+
+                            // ------------------------------
+                            // FIREBASE PRICE
+                            // ------------------------------
+                            //
+                            // IMPORTANT:
+                            // Do NOT trust the price stored
+                            // in localStorage.
+                            //
+                            // The current Firebase price
+                            // is used.
+                            // ------------------------------
+
+                            const currentPrice =
                                 Number(
-                                    cartItem.quantity
-                                ) || 0;
+                                    productData.price ??
+                                    productData.sellingPrice ??
+                                    0
+                                );
 
 
                             if (
-                                requestedQuantity <= 0
+                                currentPrice < 0 ||
+                                Number.isNaN(
+                                    currentPrice
+                                )
                             ) {
 
                                 throw new Error(
-                                    `Invalid quantity for ${cartItem.name}.`
+                                    `Invalid price for "${productData.name || cartItem.name}".`
                                 );
 
                             }
 
 
-                            if (
-                                currentStock <
-                                requestedQuantity
-                            ) {
+                            // ------------------------------
+                            // PRODUCT NAME
+                            // ------------------------------
 
-                                throw new Error(
-                                    `Not enough stock for "${cartItem.name}". Available: ${currentStock}.`
-                                );
+                            const productName =
+                                productData.name ||
+                                productData.productName ||
+                                cartItem.name ||
+                                "Unnamed Product";
 
-                            }
+
+                            // ------------------------------
+                            // NEW STOCK
+                            // ------------------------------
+
+                            const newStock =
+                                currentStock -
+                                requestedQuantity;
 
 
-                            productRefs.push({
+                            // ------------------------------
+                            // STORE UPDATE
+                            // ------------------------------
+
+                            productsToUpdate.push({
 
                                 ref:
                                     productRef,
 
-                                data:
-                                    productData,
+                                newStock:
+                                    newStock
 
-                                stock:
-                                    currentStock,
+                            });
+
+
+                            // ------------------------------
+                            // ORDER ITEM
+                            // ------------------------------
+
+                            const subtotal =
+                                Number(
+                                    (
+                                        currentPrice *
+                                        requestedQuantity
+                                    ).toFixed(2)
+                                );
+
+
+                            verifiedItems.push({
+
+                                productId:
+                                    String(
+                                        productId
+                                    ),
+
+                                name:
+                                    productName,
+
+                                price:
+                                    currentPrice,
 
                                 quantity:
                                     requestedQuantity
 
                             });
 
+
+                            verifiedTotal +=
+                                subtotal;
+
                         }
 
 
                         // ==================================
-                        // UPDATE PRODUCT STOCK
+                        // UPDATE STOCK
                         // ==================================
 
-                        productRefs.forEach(
+                        productsToUpdate.forEach(
                             function(product) {
-
-                                const newStock =
-                                    Math.max(
-                                        0,
-                                        product.stock -
-                                        product.quantity
-                                    );
-
 
                                 transaction.update(
                                     product.ref,
                                     {
 
                                         stock:
-                                            newStock
+                                            product.newStock,
+
+                                        // Keep quantity synchronized
+                                        quantity:
+                                            product.newStock
 
                                     }
                                 );
@@ -636,7 +754,7 @@ if (checkoutForm) {
 
 
                         // ==================================
-                        // CREATE FIREBASE ORDER
+                        // CREATE ORDER
                         // ==================================
 
                         const order = {
@@ -644,15 +762,20 @@ if (checkoutForm) {
                             id:
                                 generatedOrderNumber,
 
+                            orderNumber:
+                                generatedOrderNumber,
+
                             customer:
                                 customer,
 
                             items:
-                                createOrderItems(),
+                                createOrderItems(
+                                    verifiedItems
+                                ),
 
                             total:
                                 Number(
-                                    total.toFixed(2)
+                                    verifiedTotal.toFixed(2)
                                 ),
 
                             paymentMethod:
@@ -669,6 +792,10 @@ if (checkoutForm) {
 
                         };
 
+
+                        // ==================================
+                        // SAVE ORDER
+                        // ==================================
 
                         transaction.set(
                             orderRef,
@@ -703,7 +830,7 @@ if (checkoutForm) {
 
 
                 // ==================================
-                // SHOW SUCCESS MODAL
+                // SUCCESS MODAL
                 // ==================================
 
                 if (successModal) {
@@ -713,6 +840,7 @@ if (checkoutForm) {
                     );
 
                 }
+
                 else {
 
                     alert(
@@ -732,7 +860,8 @@ if (checkoutForm) {
 
 
             }
-            catch (error) {
+
+            catch(error) {
 
                 console.error(
                     "ORDER ERROR:",
@@ -740,14 +869,34 @@ if (checkoutForm) {
                 );
 
 
+                let message =
+                    error.message ||
+                    "Unknown error occurred.";
+
+
+                // ==================================
+                // FIREBASE PERMISSION ERROR
+                // ==================================
+
+                if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    message =
+                        "Firebase permission denied. Please check your Firestore security rules.";
+
+                }
+
+
                 alert(
                     "The order could not be placed.\n\n" +
-                    error.message
+                    message
                 );
 
 
                 // ==================================
-                // ENABLE BUTTON AGAIN
+                // ENABLE BUTTON
                 // ==================================
 
                 if (placeOrderButton) {
@@ -755,13 +904,15 @@ if (checkoutForm) {
                     placeOrderButton.disabled =
                         false;
 
-                    placeOrderButton.innerHTML = `
+                    placeOrderButton.innerHTML =
+                        originalButtonHTML ||
+                        `
 
-                        <i class="fa-solid fa-lock"></i>
+                            <i class="fa-solid fa-lock"></i>
 
-                        Place Order
+                            Place Order
 
-                    `;
+                        `;
 
                 }
 
