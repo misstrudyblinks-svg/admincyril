@@ -3703,9 +3703,10 @@ td {
 
     color: #6b7280;
 
-    font-size: 12px;
+    font-size: 20px;
 
     font-weight: 600;
+    font-weight: bolder;
 
 }
 
@@ -4744,7 +4745,7 @@ td {
 
     color: #9ca3af;
 
-    font-size: 10px;
+    font-size: 20px;
 
 }
 
@@ -4764,7 +4765,7 @@ td {
 
     text-decoration: none;
 
-    font-size: 10px;
+    font-size: 15px;
 
 }
 
@@ -4775,7 +4776,9 @@ td {
 
     border-top: 1px solid #312e46;
 
-    padding-top: 20px;
+    padding-top: 15px;
+
+    text-align: center;
 
 }
 

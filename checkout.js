@@ -221,30 +221,6 @@ function displayCheckout() {
 
 
 // ==========================================
-// GENERATE ORDER NUMBER
-// ==========================================
-
-function generateOrderNumber() {
-
-    const timestamp =
-        Date.now()
-            .toString()
-            .slice(-8);
-
-
-    const random =
-        Math.floor(
-            100 +
-            Math.random() * 900
-        );
-
-
-    return `ORD-${timestamp}-${random}`;
-
-}
-
-
-// ==========================================
 // PAYMENT METHOD
 // ==========================================
 
@@ -264,12 +240,156 @@ function getPaymentMethod() {
 
 
 // ==========================================
+// PAYMENT DETAILS
+// ==========================================
+
+function getPaymentDetails() {
+
+    const paymentMethod =
+        getPaymentMethod();
+
+
+    // ======================================
+    // CASH ON DELIVERY
+    // ======================================
+
+    if (
+        paymentMethod ===
+        "Cash on Delivery"
+    ) {
+
+        return {
+
+            method:
+                "Cash on Delivery"
+
+        };
+
+    }
+
+
+    // ======================================
+    // MOBILE MONEY
+    // ======================================
+
+    if (
+        paymentMethod ===
+        "Mobile Money"
+    ) {
+
+        const momoName =
+            document.getElementById(
+                "momoName"
+            );
+
+        const momoNumber =
+            document.getElementById(
+                "momoNumber"
+            );
+
+        const momoNetwork =
+            document.getElementById(
+                "momoNetwork"
+            );
+
+
+        return {
+
+            method:
+                "Mobile Money",
+
+            name:
+                momoName
+                    ? momoName.value.trim()
+                    : "",
+
+            phone:
+                momoNumber
+                    ? momoNumber.value.trim()
+                    : "",
+
+            network:
+                momoNetwork
+                    ? momoNetwork.value
+                    : ""
+
+        };
+
+    }
+
+
+    // ======================================
+    // BANK TRANSFER
+    // ======================================
+
+    if (
+        paymentMethod ===
+        "Bank Transfer"
+    ) {
+
+        const bankName =
+            document.getElementById(
+                "bankName"
+            );
+
+        const accountName =
+            document.getElementById(
+                "accountName"
+            );
+
+        const accountNumber =
+            document.getElementById(
+                "accountNumber"
+            );
+
+        const transferReference =
+            document.getElementById(
+                "transferReference"
+            );
+
+
+        return {
+
+            method:
+                "Bank Transfer",
+
+            bankName:
+                bankName
+                    ? bankName.value.trim()
+                    : "",
+
+            accountName:
+                accountName
+                    ? accountName.value.trim()
+                    : "",
+
+            accountNumber:
+                accountNumber
+                    ? accountNumber.value.trim()
+                    : "",
+
+            transferReference:
+                transferReference
+                    ? transferReference.value.trim()
+                    : ""
+
+        };
+
+    }
+
+
+    return {};
+
+}
+
+
+// ==========================================
 // GET CUSTOMER INFORMATION
 // ==========================================
 
 function getCustomerInformation() {
 
-    const getValue = function(id) {
+    function getValue(id) {
 
         const element =
             document.getElementById(id);
@@ -278,7 +398,7 @@ function getCustomerInformation() {
             ? element.value.trim()
             : "";
 
-    };
+    }
 
 
     return {
@@ -307,48 +427,407 @@ function getCustomerInformation() {
 
 
 // ==========================================
-// CREATE BASIC ORDER ITEMS
+// GENERATE ORDER NUMBER
 // ==========================================
-//
-// Firebase stock and prices will be checked
-// again during checkout.
+
+function generateOrderNumber() {
+
+    const timestamp =
+        Date.now()
+            .toString()
+            .slice(-8);
+
+
+    const random =
+        Math.floor(
+            100 +
+            Math.random() * 900
+        );
+
+
+    return `ORD-${timestamp}-${random}`;
+
+}
+
+
+// ==========================================
+// CREATE ORDER ITEMS
 // ==========================================
 
 function createOrderItems(
     verifiedItems
 ) {
 
-    return verifiedItems.map(function(item) {
+    return verifiedItems.map(
+        function(item) {
 
-        return {
+            return {
 
-            productId:
-                item.productId,
+                productId:
+                    item.productId,
 
-            name:
-                item.name,
+                name:
+                    item.name,
 
-            price:
-                Number(
-                    item.price
-                ),
+                price:
+                    Number(
+                        item.price
+                    ),
 
-            quantity:
-                Number(
-                    item.quantity
-                ),
-
-            subtotal:
-                Number(
-                    (
-                        item.price *
+                quantity:
+                    Number(
                         item.quantity
-                    ).toFixed(2)
-                )
+                    ),
 
-        };
+                subtotal:
+                    Number(
+                        (
+                            item.price *
+                            item.quantity
+                        ).toFixed(2)
+                    )
 
-    });
+            };
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// PAYMENT FORM DISPLAY
+// ==========================================
+
+function setupPaymentForms() {
+
+    const paymentInputs =
+        document.querySelectorAll(
+            'input[name="paymentMethod"]'
+        );
+
+
+    if (!paymentInputs.length) {
+        return;
+    }
+
+
+    // ======================================
+    // CREATE MOBILE MONEY FORM
+    // ======================================
+
+    const mobileMoneyForm =
+        document.createElement("div");
+
+    mobileMoneyForm.id =
+        "mobileMoneyForm";
+
+    mobileMoneyForm.style.display =
+        "none";
+
+    mobileMoneyForm.innerHTML = `
+
+        <div class="payment-details-box">
+
+            <h4>
+                Mobile Money Information
+            </h4>
+
+            <p>
+                Enter the Mobile Money details you will use for payment.
+            </p>
+
+
+            <div class="checkout-form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        Account Name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="momoName"
+                        placeholder="Enter Mobile Money account name">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Mobile Money Number *
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="momoNumber"
+                        placeholder="e.g. 024 000 0000">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Network *
+                    </label>
+
+                    <select id="momoNetwork">
+
+                        <option value="">
+                            Select network
+                        </option>
+
+                        <option value="MTN">
+                            MTN Mobile Money
+                        </option>
+
+                        <option value="Telecel">
+                            Telecel Cash
+                        </option>
+
+                        <option value="AirtelTigo">
+                            AirtelTigo Money
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    // ======================================
+    // CREATE BANK FORM
+    // ======================================
+
+    const bankTransferForm =
+        document.createElement("div");
+
+    bankTransferForm.id =
+        "bankTransferForm";
+
+    bankTransferForm.style.display =
+        "none";
+
+    bankTransferForm.innerHTML = `
+
+        <div class="payment-details-box">
+
+            <h4>
+                Bank Transfer Information
+            </h4>
+
+            <p>
+                Enter the bank details you will use for payment.
+            </p>
+
+
+            <div class="checkout-form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        Bank Name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="bankName"
+                        placeholder="Enter bank name">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Account Name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="accountName"
+                        placeholder="Enter account name">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Account Number *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="accountNumber"
+                        placeholder="Enter account number">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Transfer Reference
+                    </label>
+
+                    <input
+                        type="text"
+                        id="transferReference"
+                        placeholder="Enter transfer reference">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    // ======================================
+    // FIND PAYMENT SECTION
+    // ======================================
+
+    const paymentSection =
+        document.querySelector(
+            ".payment-options"
+        );
+
+
+    if (!paymentSection) {
+        return;
+    }
+
+
+    // Insert forms after payment options
+
+    paymentSection.parentNode.insertBefore(
+        mobileMoneyForm,
+        paymentSection.nextSibling
+    );
+
+
+    paymentSection.parentNode.insertBefore(
+        bankTransferForm,
+        mobileMoneyForm.nextSibling
+    );
+
+
+    // ======================================
+    // PAYMENT CHANGE
+    // ======================================
+
+    paymentInputs.forEach(
+        function(input) {
+
+            input.addEventListener(
+                "change",
+                function() {
+
+                    mobileMoneyForm.style.display =
+                        "none";
+
+                    bankTransferForm.style.display =
+                        "none";
+
+
+                    // Remove required
+
+                    document
+                        .querySelectorAll(
+                            "#mobileMoneyForm input, #mobileMoneyForm select, #bankTransferForm input, #bankTransferForm select"
+                        )
+                        .forEach(
+                            function(field) {
+
+                                field.required =
+                                    false;
+
+                            }
+                        );
+
+
+                    // MOBILE MONEY
+
+                    if (
+                        this.value ===
+                        "Mobile Money"
+                    ) {
+
+                        mobileMoneyForm.style.display =
+                            "block";
+
+
+                        document
+                            .querySelectorAll(
+                                "#mobileMoneyForm input, #mobileMoneyForm select"
+                            )
+                            .forEach(
+                                function(field) {
+
+                                    field.required =
+                                        true;
+
+                                }
+                            );
+
+                    }
+
+
+                    // BANK TRANSFER
+
+                    if (
+                        this.value ===
+                        "Bank Transfer"
+                    ) {
+
+                        bankTransferForm.style.display =
+                            "block";
+
+
+                        document
+                            .querySelectorAll(
+                                "#bankTransferForm input"
+                            )
+                            .forEach(
+                                function(field) {
+
+                                    field.required =
+                                        true;
+
+                                }
+                            );
+
+                        // Reference is optional
+
+                        const reference =
+                            document.getElementById(
+                                "transferReference"
+                            );
+
+                        if (reference) {
+
+                            reference.required =
+                                false;
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+    );
 
 }
 
@@ -418,6 +897,10 @@ if (checkoutForm) {
                 getPaymentMethod();
 
 
+            const paymentDetails =
+                getPaymentDetails();
+
+
             // ==================================
             // ORDER NUMBER
             // ==================================
@@ -464,19 +947,19 @@ if (checkoutForm) {
                 // FIRESTORE ORDER REFERENCE
                 // ==================================
 
-               const orderRef =
-                            doc(
-                               db,
-                             "orders",
-                             generatedOrderNumber
-                             );
+                const orderRef =
+                    doc(
+                        db,
+                        "orders",
+                        generatedOrderNumber
+                    );
+
 
                 // ==================================
                 // VERIFIED ITEMS
                 // ==================================
 
                 let verifiedItems = [];
-
 
                 let verifiedTotal = 0;
 
@@ -493,17 +976,12 @@ if (checkoutForm) {
 
 
                         // ==================================
-                        // IMPORTANT:
-                        // ALL PRODUCT READS HAPPEN FIRST
+                        // READ PRODUCTS FIRST
                         // ==================================
 
                         for (
                             const cartItem of cart
                         ) {
-
-                            // ------------------------------
-                            // FIREBASE PRODUCT ID
-                            // ------------------------------
 
                             const productId =
                                 cartItem.id ||
@@ -518,10 +996,6 @@ if (checkoutForm) {
 
                             }
 
-
-                            // ------------------------------
-                            // QUANTITY
-                            // ------------------------------
 
                             const requestedQuantity =
                                 Number(
@@ -543,10 +1017,6 @@ if (checkoutForm) {
                             }
 
 
-                            // ------------------------------
-                            // FIREBASE PRODUCT REFERENCE
-                            // ------------------------------
-
                             const productRef =
                                 doc(
                                     db,
@@ -556,10 +1026,6 @@ if (checkoutForm) {
                                     )
                                 );
 
-
-                            // ------------------------------
-                            // GET CURRENT FIREBASE PRODUCT
-                            // ------------------------------
 
                             const productSnapshot =
                                 await transaction.get(
@@ -582,10 +1048,6 @@ if (checkoutForm) {
                                 productSnapshot.data();
 
 
-                            // ------------------------------
-                            // CURRENT FIREBASE STOCK
-                            // ------------------------------
-
                             const currentStock =
                                 Number(
                                     productData.stock ??
@@ -605,10 +1067,6 @@ if (checkoutForm) {
                             }
 
 
-                            // ------------------------------
-                            // CHECK STOCK
-                            // ------------------------------
-
                             if (
                                 requestedQuantity >
                                 currentStock
@@ -620,18 +1078,6 @@ if (checkoutForm) {
 
                             }
 
-
-                            // ------------------------------
-                            // FIREBASE PRICE
-                            // ------------------------------
-                            //
-                            // IMPORTANT:
-                            // Do NOT trust the price stored
-                            // in localStorage.
-                            //
-                            // The current Firebase price
-                            // is used.
-                            // ------------------------------
 
                             const currentPrice =
                                 Number(
@@ -655,10 +1101,6 @@ if (checkoutForm) {
                             }
 
 
-                            // ------------------------------
-                            // PRODUCT NAME
-                            // ------------------------------
-
                             const productName =
                                 productData.name ||
                                 productData.productName ||
@@ -666,18 +1108,10 @@ if (checkoutForm) {
                                 "Unnamed Product";
 
 
-                            // ------------------------------
-                            // NEW STOCK
-                            // ------------------------------
-
                             const newStock =
                                 currentStock -
                                 requestedQuantity;
 
-
-                            // ------------------------------
-                            // STORE UPDATE
-                            // ------------------------------
 
                             productsToUpdate.push({
 
@@ -689,10 +1123,6 @@ if (checkoutForm) {
 
                             });
 
-
-                            // ------------------------------
-                            // ORDER ITEM
-                            // ------------------------------
 
                             const subtotal =
                                 Number(
@@ -742,7 +1172,6 @@ if (checkoutForm) {
                                         stock:
                                             product.newStock,
 
-                                        // Keep quantity synchronized
                                         quantity:
                                             product.newStock
 
@@ -780,6 +1209,9 @@ if (checkoutForm) {
 
                             paymentMethod:
                                 paymentMethod,
+
+                            paymentDetails:
+                                paymentDetails,
 
                             status:
                                 "Pending",
@@ -858,7 +1290,6 @@ if (checkoutForm) {
                     generatedOrderNumber
                 );
 
-
             }
 
             catch(error) {
@@ -873,10 +1304,6 @@ if (checkoutForm) {
                     error.message ||
                     "Unknown error occurred.";
 
-
-                // ==================================
-                // FIREBASE PERMISSION ERROR
-                // ==================================
 
                 if (
                     error.code ===
@@ -894,10 +1321,6 @@ if (checkoutForm) {
                     message
                 );
 
-
-                // ==================================
-                // ENABLE BUTTON
-                // ==================================
 
                 if (placeOrderButton) {
 
@@ -962,6 +1385,8 @@ function escapeHTML(value) {
 // ==========================================
 
 displayCheckout();
+
+setupPaymentForms();
 
 
 // ==========================================

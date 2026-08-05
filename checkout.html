@@ -17,192 +17,323 @@
 
     <!-- HEADER -->
 
-    <header class="shop-header">
+    <!-- HEADER -->
 
-        <div class="shop-logo">
+<header class="shop-header">
 
-            <div class="shop-logo-icon">
-                <i class="fa-solid fa-bag-shopping"></i>
-            </div>
+    <div class="shop-logo">
 
-            <div>
-                <h1>BizManager</h1>
-                <span>Secure Checkout</span>
-            </div>
-
+        <div class="shop-logo-icon">
+            <i class="fa-solid fa-bag-shopping"></i>
         </div>
 
-        <a href="index.html"
-           class="back-shop">
-
-            <i class="fa-solid fa-arrow-left"></i>
-            Continue Shopping
-
-        </a>
-
-    </header>
-
-
-    <!-- CHECKOUT -->
-
-    <main class="checkout-container">
-
-        <div class="checkout-title">
-
-            <span>ORDER</span>
-
-            <h2>Complete Your Order</h2>
-
-            <p>
-                Enter your information below to place your order.
-            </p>
-
+        <div>
+            <h1>BizManager</h1>
+            <span>Secure Checkout</span>
         </div>
 
+    </div>
 
-        <div class="checkout-layout">
+    <a href="index.html" class="back-shop">
+
+        <i class="fa-solid fa-arrow-left"></i>
+        Continue Shopping
+
+    </a>
+
+</header>
 
 
-            <!-- CUSTOMER INFORMATION -->
+<!-- CHECKOUT -->
 
-            <section class="checkout-card">
+<main class="checkout-container">
 
-                <div class="checkout-card-title">
+    <div class="checkout-title">
 
-                    <div class="checkout-number">
-                        1
+        <span>ORDER</span>
+
+        <h2>Complete Your Order</h2>
+
+        <p>
+            Enter your information below to place your order.
+        </p>
+
+    </div>
+
+
+    <div class="checkout-layout">
+
+
+        <!-- CUSTOMER INFORMATION -->
+
+        <section class="checkout-card">
+
+            <div class="checkout-card-title">
+
+                <div class="checkout-number">
+                    1
+                </div>
+
+                <div>
+
+                    <h3>
+                        Customer Information
+                    </h3>
+
+                    <p>
+                        Where should we deliver your order?
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form id="checkoutForm">
+
+
+                <div class="checkout-form-grid">
+
+
+                    <div class="form-group">
+
+                        <label for="customerName">
+                            Full Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="customerName"
+                            required
+                            placeholder="Enter your full name">
+
                     </div>
 
-                    <div>
 
-                        <h3>
-                            Customer Information
-                        </h3>
+                    <div class="form-group">
 
-                        <p>
-                            Where should we deliver your order?
-                        </p>
+                        <label for="customerPhone">
+                            Phone Number *
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="customerPhone"
+                            required
+                            placeholder="e.g. 024 000 0000">
 
                     </div>
+
+
+                    <div class="form-group">
+
+                        <label for="customerEmail">
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="customerEmail"
+                            placeholder="example@email.com">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="customerCity">
+                            City *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="customerCity"
+                            required
+                            placeholder="e.g. Accra">
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label for="customerAddress">
+                            Delivery Address *
+                        </label>
+
+                        <textarea
+                            id="customerAddress"
+                            required
+                            rows="3"
+                            placeholder="Enter your complete delivery address"></textarea>
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label for="customerNote">
+                            Additional Note
+                        </label>
+
+                        <textarea
+                            id="customerNote"
+                            rows="2"
+                            placeholder="Any special instructions?"></textarea>
+
+                    </div>
+
 
                 </div>
 
 
-                <form id="checkoutForm">
+                <!-- PAYMENT -->
 
+                <div class="checkout-payment-section">
 
-                    <div class="checkout-form-grid">
+                    <div class="checkout-card-title">
 
-
-                        <div class="form-group">
-
-                            <label>
-                                Full Name *
-                            </label>
-
-                            <input
-                                type="text"
-                                id="customerName"
-                                required
-                                placeholder="Enter your full name">
-
+                        <div class="checkout-number">
+                            2
                         </div>
 
+                        <div>
 
-                        <div class="form-group">
+                            <h3>
+                                Payment Method
+                            </h3>
 
-                            <label>
-                                Phone Number *
-                            </label>
-
-                            <input
-                                type="tel"
-                                id="customerPhone"
-                                required
-                                placeholder="e.g. 024 000 0000">
+                            <p>
+                                Select your preferred payment method.
+                            </p>
 
                         </div>
-
-
-                        <div class="form-group">
-
-                            <label>
-                                Email Address
-                            </label>
-
-                            <input
-                                type="email"
-                                id="customerEmail"
-                                placeholder="example@email.com">
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>
-                                City *
-                            </label>
-
-                            <input
-                                type="text"
-                                id="customerCity"
-                                required
-                                placeholder="e.g. Accra">
-
-                        </div>
-
-
-                        <div class="form-group full">
-
-                            <label>
-                                Delivery Address *
-                            </label>
-
-                            <textarea
-                                id="customerAddress"
-                                required
-                                rows="3"
-                                placeholder="Enter your complete delivery address"></textarea>
-
-                        </div>
-
-
-                        <div class="form-group full">
-
-                            <label>
-                                Additional Note
-                            </label>
-
-                            <textarea
-                                id="customerNote"
-                                rows="2"
-                                placeholder="Any special instructions?"></textarea>
-
-                        </div>
-
 
                     </div>
 
 
-                    <!-- PAYMENT -->
+                    <div class="payment-options">
 
-                    <div class="checkout-payment-section">
 
-                        <div class="checkout-card-title">
+                        <!-- CASH -->
 
-                            <div class="checkout-number">
-                                2
+                        <label class="payment-option">
+
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="Cash on Delivery"
+                                checked>
+
+                            <div class="payment-option-content">
+
+                                <div class="payment-icon">
+                                    <i class="fa-solid fa-money-bill"></i>
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Cash on Delivery
+                                    </strong>
+
+                                    <span>
+                                        Pay when your order arrives.
+                                    </span>
+
+                                </div>
+
                             </div>
+
+                        </label>
+
+
+                        <!-- MOBILE MONEY -->
+
+                        <label class="payment-option">
+
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="Mobile Money">
+
+                            <div class="payment-option-content">
+
+                                <div class="payment-icon">
+                                    <i class="fa-solid fa-mobile-screen-button"></i>
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Mobile Money
+                                    </strong>
+
+                                    <span>
+                                        Pay using Mobile Money.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </label>
+
+
+                        <!-- BANK -->
+
+                        <label class="payment-option">
+
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="Bank Transfer">
+
+                            <div class="payment-option-content">
+
+                                <div class="payment-icon">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Bank Transfer
+                                    </strong>
+
+                                    <span>
+                                        Pay directly through your bank.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- =================================
+                         MOBILE MONEY DETAILS
+                    ================================== -->
+
+                    <div
+                        id="mobileMoneyDetails"
+                        class="payment-details"
+                        style="display:none;">
+
+                        <div class="payment-details-header">
+
+                            <i class="fa-solid fa-mobile-screen-button"></i>
 
                             <div>
 
-                                <h3>
-                                    Payment Method
-                                </h3>
+                                <h4>
+                                    Mobile Money Details
+                                </h4>
 
                                 <p>
-                                    Select your preferred payment method.
+                                    Enter the details of the Mobile Money account used for payment.
                                 </p>
 
                             </div>
@@ -210,98 +341,78 @@
                         </div>
 
 
-                        <div class="payment-options">
+                        <div class="checkout-form-grid">
 
 
-                            <label class="payment-option">
+                            <div class="form-group">
 
-                                <input
-                                    type="radio"
-                                    name="paymentMethod"
-                                    value="Cash on Delivery"
-                                    checked>
+                                <label for="momoNetwork">
+                                    Mobile Money Network *
+                                </label>
 
-                                <div class="payment-option-content">
+                                <select id="momoNetwork">
 
-                                    <div class="payment-icon">
-                                        <i class="fa-solid fa-money-bill"></i>
-                                    </div>
+                                    <option value="">
+                                        Select network
+                                    </option>
 
-                                    <div>
+                                    <option value="MTN">
+                                        MTN Mobile Money
+                                    </option>
 
-                                        <strong>
-                                            Cash on Delivery
-                                        </strong>
+                                    <option value="Telecel">
+                                        Telecel Cash
+                                    </option>
 
-                                        <span>
-                                            Pay when your order arrives.
-                                        </span>
+                                    <option value="AirtelTigo">
+                                        AirtelTigo Money
+                                    </option>
 
-                                    </div>
+                                </select>
 
-                                </div>
-
-                            </label>
+                            </div>
 
 
-                            <label class="payment-option">
+                            <div class="form-group">
 
-                                <input
-                                    type="radio"
-                                    name="paymentMethod"
-                                    value="Mobile Money">
-
-                                <div class="payment-option-content">
-
-                                    <div class="payment-icon">
-                                        <i class="fa-solid fa-mobile-screen-button"></i>
-                                    </div>
-
-                                    <div>
-
-                                        <strong>
-                                            Mobile Money
-                                        </strong>
-
-                                        <span>
-                                            Pay using Mobile Money.
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </label>
-
-
-                            <label class="payment-option">
+                                <label for="momoNumber">
+                                    Mobile Money Number *
+                                </label>
 
                                 <input
-                                    type="radio"
-                                    name="paymentMethod"
-                                    value="Bank Transfer">
+                                    type="tel"
+                                    id="momoNumber"
+                                    placeholder="e.g. 024 000 0000">
 
-                                <div class="payment-option-content">
+                            </div>
 
-                                    <div class="payment-icon">
-                                        <i class="fa-solid fa-building-columns"></i>
-                                    </div>
 
-                                    <div>
+                            <div class="form-group">
 
-                                        <strong>
-                                            Bank Transfer
-                                        </strong>
+                                <label for="momoName">
+                                    Account Holder Name *
+                                </label>
 
-                                        <span>
-                                            Pay directly through your bank.
-                                        </span>
+                                <input
+                                    type="text"
+                                    id="momoName"
+                                    placeholder="Name on Mobile Money account">
 
-                                    </div>
+                            </div>
 
-                                </div>
 
-                            </label>
+                            <div class="form-group">
+
+                                <label for="momoReference">
+                                    Transaction Reference
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="momoReference"
+                                    placeholder="Enter payment reference if available">
+
+                            </div>
 
 
                         </div>
@@ -309,174 +420,273 @@
                     </div>
 
 
-                    <button
-                        type="submit"
-                        class="place-order-btn">
+                    <!-- =================================
+                         BANK TRANSFER DETAILS
+                    ================================== -->
 
-                        <i class="fa-solid fa-lock"></i>
+                    <div
+                        id="bankTransferDetails"
+                        class="payment-details"
+                        style="display:none;">
 
-                        Place Order
+                        <div class="payment-details-header">
 
-                    </button>
+                            <i class="fa-solid fa-building-columns"></i>
 
+                            <div>
 
-                </form>
+                                <h4>
+                                    Bank Transfer Details
+                                </h4>
 
-            </section>
+                                <p>
+                                    Enter the bank account details used to make the payment.
+                                </p>
 
+                            </div>
 
-
-            <!-- ORDER SUMMARY -->
-
-            <aside class="order-summary-card">
-
-                <div class="order-summary-header">
-
-                    <h3>
-                        Your Order
-                    </h3>
-
-                    <span id="summaryCount">
-                        0 items
-                    </span>
-
-                </div>
+                        </div>
 
 
-                <div
-                    id="checkoutItems"
-                    class="checkout-items">
-
-                </div>
+                        <div class="checkout-form-grid">
 
 
-                <div class="summary-line">
+                            <div class="form-group">
 
-                    <span>
-                        Subtotal
-                    </span>
+                                <label for="bankName">
+                                    Bank Name *
+                                </label>
 
-                    <strong id="checkoutSubtotal">
-                        GH₵0.00
-                    </strong>
+                                <input
+                                    type="text"
+                                    id="bankName"
+                                    placeholder="Enter bank name">
 
-                </div>
-
-
-                <div class="summary-line">
-
-                    <span>
-                        Delivery
-                    </span>
-
-                    <strong>
-                        Free
-                    </strong>
-
-                </div>
+                            </div>
 
 
-                <div class="summary-divider"></div>
+                            <div class="form-group">
+
+                                <label for="bankAccountName">
+                                    Account Holder Name *
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="bankAccountName"
+                                    placeholder="Name on bank account">
+
+                            </div>
 
 
-                <div class="summary-total">
+                            <div class="form-group">
 
-                    <span>
-                        Total
-                    </span>
+                                <label for="bankAccountNumber">
+                                    Account Number *
+                                </label>
 
-                    <strong id="checkoutTotal">
-                        GH₵0.00
-                    </strong>
+                                <input
+                                    type="text"
+                                    id="bankAccountNumber"
+                                    placeholder="Enter account number">
 
-                </div>
+                            </div>
 
 
-                <div class="secure-checkout">
+                            <div class="form-group">
 
-                    <i class="fa-solid fa-shield-halved"></i>
+                                <label for="bankReference">
+                                    Transfer Reference *
+                                </label>
 
-                    <div>
+                                <input
+                                    type="text"
+                                    id="bankReference"
+                                    placeholder="Enter transfer reference">
 
-                        <strong>
-                            Secure Checkout
-                        </strong>
+                            </div>
 
-                        <p>
-                            Your order information is safely stored.
-                        </p>
+
+                        </div>
 
                     </div>
 
                 </div>
 
-            </aside>
 
-        </div>
+                <!-- PLACE ORDER -->
 
-    </main>
+                <button
+                    type="submit"
+                    class="place-order-btn">
+
+                    <i class="fa-solid fa-lock"></i>
+
+                    Place Order
+
+                </button>
 
 
-    <!-- SUCCESS MODAL -->
+            </form>
 
-    <div
-        class="order-success-overlay"
-        id="orderSuccess">
+        </section>
 
-        <div class="order-success-card">
 
-            <div class="success-icon">
 
-                <i class="fa-solid fa-check"></i>
+        <!-- ORDER SUMMARY -->
+
+        <aside class="order-summary-card">
+
+            <div class="order-summary-header">
+
+                <h3>
+                    Your Order
+                </h3>
+
+                <span id="summaryCount">
+                    0 items
+                </span>
 
             </div>
 
-            <h2>
-                Order Placed!
-            </h2>
 
-            <p>
-                Thank you for shopping with BizManager.
-            </p>
+            <div
+                id="checkoutItems"
+                class="checkout-items">
+            </div>
 
 
-            <div class="order-number-box">
+            <div class="summary-line">
 
                 <span>
-                    ORDER NUMBER
+                    Subtotal
                 </span>
 
-                <strong id="orderNumber">
-                    ORD-000000
+                <strong id="checkoutSubtotal">
+                    GH₵0.00
                 </strong>
 
             </div>
 
 
-            <p class="success-message">
+            <div class="summary-line">
 
-                Your order has been received successfully.
-                Our team will contact you shortly.
+                <span>
+                    Delivery
+                </span>
 
-            </p>
+                <strong>
+                    Free
+                </strong>
+
+            </div>
 
 
-            <a
-                href="index.html"
-                class="success-btn">
+            <div class="summary-divider"></div>
 
-                Continue Shopping
 
-                <i class="fa-solid fa-arrow-right"></i>
+            <div class="summary-total">
 
-            </a>
+                <span>
+                    Total
+                </span>
 
-        </div>
+                <strong id="checkoutTotal">
+                    GH₵0.00
+                </strong>
+
+            </div>
+
+
+            <div class="secure-checkout">
+
+                <i class="fa-solid fa-shield-halved"></i>
+
+                <div>
+
+                    <strong>
+                        Secure Checkout
+                    </strong>
+
+                    <p>
+                        Your order information is safely stored.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </aside>
 
     </div>
 
+</main>
 
-<script type="module" src="checkout.js"></script>
+
+<!-- SUCCESS MODAL -->
+
+<div
+    class="order-success-overlay"
+    id="orderSuccess">
+
+    <div class="order-success-card">
+
+        <div class="success-icon">
+
+            <i class="fa-solid fa-check"></i>
+
+        </div>
+
+        <h2>
+            Order Placed!
+        </h2>
+
+        <p>
+            Thank you for shopping with BizManager.
+        </p>
+
+
+        <div class="order-number-box">
+
+            <span>
+                ORDER NUMBER
+            </span>
+
+            <strong id="orderNumber">
+                ORD-000000
+            </strong>
+
+        </div>
+
+
+        <p class="success-message">
+
+            Your order has been received successfully.
+            Our team will contact you shortly.
+
+        </p>
+
+
+        <a
+            href="index.html"
+            class="success-btn">
+
+            Continue Shopping
+
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<script
+    type="module"
+    src="checkout.js">
+</script>
+   
 </body>
 
 </html>
