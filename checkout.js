@@ -944,6 +944,43 @@ if (checkoutForm) {
             try {
 
                 // ==================================
+                // PAYSTACK ONLINE CHECKOUT
+                // ==================================
+                // Deploy the backend first, then replace this URL with its HTTPS URL.
+                if (paymentMethod === "Paystack") {
+
+                    const PAYSTACK_BACKEND_URL = "https://YOUR-BACKEND-DOMAIN.example.com";
+
+                    if (PAYSTACK_BACKEND_URL.includes("YOUR-BACKEND-DOMAIN")) {
+                        throw new Error("Paystack backend is not configured yet. Follow PAYSTACK_SETUP.md and add your deployed backend URL to checkout.js.");
+                    }
+
+                    if (!customer.email) {
+                        throw new Error("Please enter your email address to continue with Paystack.");
+                    }
+
+                    const response = await fetch(`${PAYSTACK_BACKEND_URL}/api/paystack/initialize`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            customer,
+                            items: cart.map(item => ({
+                                productId: String(item.id || item.productId || ""),
+                                quantity: Number(item.quantity)
+                            }))
+                        })
+                    });
+
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok || !result.authorization_url) {
+                        throw new Error(result.error || "Could not start Paystack checkout.");
+                    }
+
+                    window.location.assign(result.authorization_url);
+                    return;
+                }
+
+                // ==================================
                 // FIRESTORE ORDER REFERENCE
                 // ==================================
 
@@ -1345,6 +1382,27 @@ if (checkoutForm) {
     );
 
 }
+
+
+// ==========================================
+// PAYSTACK CALLBACK UI
+// The backend redirects here only after server-side verification.
+// ==========================================
+(function handlePaystackReturn() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") !== "success") return;
+
+    const reference = params.get("order") || params.get("reference") || "";
+    localStorage.removeItem("shoppingCart");
+    cart = [];
+
+    if (orderNumber) orderNumber.textContent = reference || "Payment confirmed";
+    if (successModal) successModal.classList.add("show");
+    else alert(`Paystack payment verified. Order: ${reference}`);
+
+    // Remove callback parameters from the address bar after rendering.
+    window.history.replaceState({}, document.title, window.location.pathname);
+})();
 
 
 // ==========================================
