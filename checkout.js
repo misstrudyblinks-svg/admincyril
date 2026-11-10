@@ -949,7 +949,7 @@ if (checkoutForm) {
                 // Deploy the backend first, then replace this URL with its HTTPS URL.
                 if (paymentMethod === "Paystack") {
 
-                    const PAYSTACK_BACKEND_URL = "https://YOUR-BACKEND-DOMAIN.example.com";
+                    const PAYSTACK_BACKEND_URL = "https://bizmanager-paystack-api.onrender.com";
 
                     if (PAYSTACK_BACKEND_URL.includes("YOUR-BACKEND-DOMAIN")) {
                         throw new Error("Paystack backend is not configured yet. Follow PAYSTACK_SETUP.md and add your deployed backend URL to checkout.js.");
@@ -1459,3 +1459,4 @@ console.log(
     "Shopping Cart:",
     cart
 );
+
